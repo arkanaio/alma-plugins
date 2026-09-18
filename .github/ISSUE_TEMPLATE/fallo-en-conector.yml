@@ -1,0 +1,35 @@
+name: Fallo en un conector
+description: Un conector existente devuelve datos incorrectos o deja de funcionar.
+labels: ["fallo"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Si el fallo tiene consecuencias de seguridad, **no abras esta issue**: usa el aviso privado de vulnerabilidades. Ver [SECURITY.md](https://github.com/arkanaio/alma-plugins/blob/main/SECURITY.md).
+  - type: input
+    id: conector
+    attributes:
+      label: Conector
+      placeholder: conectores/<proveedor>
+    validations:
+      required: true
+  - type: textarea
+    id: esperado
+    attributes:
+      label: Qué esperabas y qué pasa
+    validations:
+      required: true
+  - type: textarea
+    id: reproducir
+    attributes:
+      label: Cómo reproducirlo
+      description: Si puedes, añade unos datos de ejemplo que lo provoquen. Anonimizados y sin secretos.
+    validations:
+      required: true
+  - type: checkboxes
+    id: compromiso
+    attributes:
+      label: Antes de enviar
+      options:
+        - label: No he incluido credenciales, correos ni datos de personas reales.
+          required: true

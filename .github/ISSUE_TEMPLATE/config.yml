@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Problema de seguridad
+    url: https://github.com/arkanaio/alma-plugins/security/advisories/new
+    about: No abras una issue pública. Usa el aviso privado de vulnerabilidades.
+  - name: Dudas sobre el producto ALMA
+    url: https://github.com/arkanaio/alma
+    about: Este repositorio es solo para conectores.

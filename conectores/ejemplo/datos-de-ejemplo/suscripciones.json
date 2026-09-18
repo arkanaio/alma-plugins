@@ -1,0 +1,42 @@
+{
+  "": {
+    "subscriptions": [
+      {
+        "id": "sub_001",
+        "product": "Ejemplo Pro",
+        "plan": "Business",
+        "seats": 25,
+        "unit_price": "12.50",
+        "currency": "EUR",
+        "billing_cycle": "monthly",
+        "renews_on": "2027-01-31"
+      },
+      {
+        "id": "sub_002",
+        "product": "Ejemplo Analytics",
+        "plan": null,
+        "seats": 5,
+        "unit_price": "180.00",
+        "currency": "EUR",
+        "billing_cycle": "yearly",
+        "renews_on": "2026-11-15"
+      }
+    ],
+    "next_cursor": "pagina-2"
+  },
+  "pagina-2": {
+    "subscriptions": [
+      {
+        "id": "sub_003",
+        "product": "Ejemplo Storage",
+        "plan": "Starter",
+        "seats": null,
+        "unit_price": null,
+        "currency": null,
+        "billing_cycle": null,
+        "renews_on": null
+      }
+    ],
+    "next_cursor": null
+  }
+}
