@@ -45,9 +45,16 @@ jobs:
       - run: pnpm install --frozen-lockfile
       # Nothing is published that has not passed the same checks as a PR.
       - run: pnpm verify
+      # Provenance only on GitHub-hosted runners: npm rejects an attestation
+      # built anywhere else, because an attestation is worth exactly as much as
+      # the verifiability of the machine that made it. The organisation's own
+      # runners are used while this repository is private and its Actions
+      # billing is blocked; the day CI_RUNS_ON switches to ubuntu-latest for
+      # going public, provenance turns on by itself.
       - name: Publish the package
         run: >-
           pnpm --filter ${{ inputs.package }} publish
-          --access public --provenance --no-git-checks
+          --access public --no-git-checks
+          ${{ runner.environment == 'github-hosted' && '--provenance' || '' }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
