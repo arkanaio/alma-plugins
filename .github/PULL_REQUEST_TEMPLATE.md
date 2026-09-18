@@ -25,6 +25,9 @@
 - I confirm no `ConnectorError` carries the provider's response in its code or
   message: <!-- yes / no -->
 - I confirm the sample data is anonymised and contains no secrets: <!-- yes / no -->
+- I confirm every commit is signed off (`git commit -s`) and that this code is
+  mine to contribute under the Apache 2.0 license of this repository, including
+  any code I took from elsewhere: <!-- yes / no -->
 
 ## Last activity
 

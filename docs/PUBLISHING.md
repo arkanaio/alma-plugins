@@ -52,6 +52,9 @@ paper that no longer describes what runs.
   record schema rejects it outright.
 - **A semantic version** in the manifest, matching the published version. They
   are the same claim made from two sides.
+- **`"license": "Apache-2.0"`** in its `package.json`. It is the license of the
+  whole repository, and a published package with no license field is one nobody
+  downstream can account for.
 - **No install scripts.** pnpm blocks them unless explicitly allowed, and a
   connector is never added to that list.
 - **Runtime dependencies are allowed**, and reviewed one by one. Each one is

@@ -78,3 +78,11 @@ review approved it. See [docs/PUBLISHING.md](docs/PUBLISHING.md).
 
 To report a security problem, read [SECURITY.md](SECURITY.md). Do not open a
 public issue.
+
+## License
+
+[Apache License 2.0](LICENSE), for the whole repository: the contract, arkana's
+own connectors, and the ones contributed from outside. A contribution is made
+under that same license and certified with a sign-off per commit, checked in CI.
+There is no CLA. See
+[CONTRIBUTING.md](CONTRIBUTING.md#license-and-sign-off).

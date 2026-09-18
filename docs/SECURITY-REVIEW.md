@@ -23,7 +23,8 @@ automatic check has moved to this side, which is why this list exists.
 - [ ] An accepted proposal issue exists for this provider.
 - [ ] The PR brings **one connector** and does not touch `contract/`, another
       connector, or the repository configuration. If it does, split it.
-- [ ] `defineConnector` accepts the manifest, and CI is green.
+- [ ] `defineConnector` accepts the manifest, and CI is green, the `dco` job
+      included: every commit is signed off by its author.
 - [ ] `supportLevel` is the right one: `community` for an external contribution.
 - [ ] `capabilities` is the minimum the connector actually implements. A
       capability declared "for later" is approved surface nobody needed.

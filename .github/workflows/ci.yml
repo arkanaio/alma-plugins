@@ -49,3 +49,24 @@ jobs:
       # Tests run against each connector's sample data. This job holds no
       # provider credential, and it must not hold one.
       - run: pnpm test
+
+  # Every commit in a pull request certifies its origin with a Signed-off-by
+  # trailer (DCO 1.1). There is no CLA: Apache 2.0 section 5 already places a
+  # contribution under the same license, and what the sign-off adds is the
+  # author's statement that the code is theirs to contribute. See
+  # CONTRIBUTING.md#license-and-sign-off.
+  dco:
+    name: dco
+    if: github.event_name == 'pull_request'
+    runs-on: ${{ fromJSON(vars.CI_RUNS_ON || '["self-hosted","alma"]') }}
+    steps:
+      # The whole range between base and head has to be readable, so the default
+      # shallow clone is not enough.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+      - run: ./.github/scripts/check-dco.sh
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
