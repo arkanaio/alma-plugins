@@ -22,7 +22,13 @@ jobs:
     environment: publish
     steps:
       - uses: actions/checkout@v4
+      # The organisation's runners share a HOME: the action reinstalls pnpm into
+      # dest on start, and two self-installs at once over the same directory
+      # corrupt it. Each instance uses its own; GitHub-hosted runners keep the
+      # default destination. Same reasoning as arkanaio/alma.
       - uses: pnpm/action-setup@v4
+        with:
+          dest: ${{ runner.environment == 'self-hosted' && format('~/setup-pnpm/{0}', runner.name) || '~/setup-pnpm' }}
       - uses: actions/setup-node@v4
         with:
           node-version: 24
