@@ -13,10 +13,20 @@ concurrency:
   group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+# Jobs run on the organisation's own runners (the "alma" label), the same ones
+# arkanaio/alma uses. To fall back to GitHub-hosted runners, set the repository
+# variable CI_RUNS_ON to "ubuntu-latest", quoted, because it is read as JSON.
+#
+# That variable has to be set before this repository is made public. The
+# organisation's runner group has allows_public_repositories set to false, which
+# is exactly right: a self-hosted runner executing a pull request from a fork is
+# running unreviewed code on the organisation's machine, and receiving pull
+# requests from forks is what this repository exists for. Actions is free on
+# public repositories, so the switch costs nothing.
 jobs:
   verify:
     name: verify
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(vars.CI_RUNS_ON || '["self-hosted","alma"]') }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
