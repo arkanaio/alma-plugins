@@ -14,8 +14,8 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  verificar:
-    name: verificar
+  verify:
+    name: verify
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,11 +24,11 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
-      # Sin --frozen-lockfile una aportacion podria resolver versiones
-      # distintas de las revisadas.
+      # Without --frozen-lockfile a contribution could resolve versions other
+      # than the reviewed ones.
       - run: pnpm install --frozen-lockfile
       - run: pnpm biome ci .
       - run: pnpm tsc --noEmit
-      # Las pruebas corren contra los datos de ejemplo de cada conector. Este
-      # job no tiene ninguna credencial de ningun proveedor, y no debe tenerla.
+      # Tests run against each connector's sample data. This job holds no
+      # provider credential, and it must not hold one.
       - run: pnpm test

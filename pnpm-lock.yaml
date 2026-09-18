@@ -18,16 +18,16 @@ importers:
         specifier: 5.9.3
         version: 5.9.3
 
-  conectores/ejemplo:
+  connectors/example:
     dependencies:
-      '@alma/contrato-conector':
+      '@alma/connector-contract':
         specifier: workspace:*
-        version: link:../../contrato
+        version: link:../../contract
       zod:
         specifier: 4.1.13
         version: 4.1.13
 
-  contrato:
+  contract:
     dependencies:
       zod:
         specifier: 4.1.13

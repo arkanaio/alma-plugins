@@ -1,0 +1,69 @@
+name: Propose a new connector
+description: Before writing code, let us agree on the provider and its scope.
+labels: ["proposal"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Read [CONTRIBUTING.md](https://github.com/arkanaio/alma-plugins/blob/main/CONTRIBUTING.md) before filling this in. An accepted proposal saves you writing a connector that cannot then be accepted. Write this issue in English.
+  - type: input
+    id: provider
+    attributes:
+      label: Provider
+      placeholder: Slack, Figma, Atlassian...
+    validations:
+      required: true
+  - type: checkboxes
+    id: capabilities
+    attributes:
+      label: Capabilities it would synchronise
+      options:
+        - label: Licenses (contracts and occupied seats)
+        - label: Directory (list of employees)
+        - label: Devices (equipment inventory)
+    validations:
+      required: true
+  - type: input
+    id: api
+    attributes:
+      label: The provider's API documentation
+      description: If the provider offers no programmatic way in, say so here. That case is not this repository yet.
+    validations:
+      required: true
+  - type: textarea
+    id: credential
+    attributes:
+      label: Credential and permissions
+      description: What has to be created at the provider, and the minimum read-only permissions it needs.
+    validations:
+      required: true
+  - type: dropdown
+    id: activity
+    attributes:
+      label: Does the provider publish last activity of usage?
+      description: This is optional. A license connector without activity is just as valid.
+      options:
+        - "It does not publish it"
+        - "Yes, and I know which field it comes from"
+        - "I do not know yet"
+    validations:
+      required: true
+  - type: textarea
+    id: activity-detail
+    attributes:
+      label: What that activity measures
+      description: Only if you answered yes. Say which field it is and what it measures exactly. A sync date, an assignment date, or a generic sign-in to the account is not usage of a license.
+  - type: textarea
+    id: limits
+    attributes:
+      label: Known limits
+      description: Quotas, pagination, delays, fields the provider does not offer.
+  - type: checkboxes
+    id: commitment
+    attributes:
+      label: Before you submit
+      options:
+        - label: I have read the contribution guide and the connector contract.
+          required: true
+        - label: I will not include credentials or real people's data in the code or the sample data.
+          required: true

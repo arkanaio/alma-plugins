@@ -1,0 +1,35 @@
+name: Bug in a connector
+description: An existing connector returns wrong data or stopped working.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        If the bug has security consequences, **do not open this issue**: use private vulnerability reporting. See [SECURITY.md](https://github.com/arkanaio/alma-plugins/blob/main/SECURITY.md). Write this issue in English.
+  - type: input
+    id: connector
+    attributes:
+      label: Connector
+      placeholder: connectors/<provider>
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected, and what happens
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce it
+      description: If you can, add sample data that triggers it. Anonymised and with no secrets.
+    validations:
+      required: true
+  - type: checkboxes
+    id: commitment
+    attributes:
+      label: Before you submit
+      options:
+        - label: I have not included credentials, emails, or real people's data.
+          required: true

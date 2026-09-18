@@ -12,8 +12,8 @@
     "check": "biome check .",
     "check:write": "biome check --write .",
     "typecheck": "tsc --noEmit",
-    "test": "node --test \"contrato/tests/*.test.ts\" \"conectores/*/tests/*.test.ts\"",
-    "verificar": "pnpm check && pnpm typecheck && pnpm test"
+    "test": "node --test \"contract/tests/*.test.ts\" \"connectors/*/tests/*.test.ts\"",
+    "verify": "pnpm check && pnpm typecheck && pnpm test"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.7",

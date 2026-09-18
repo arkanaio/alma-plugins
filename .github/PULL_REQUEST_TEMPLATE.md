@@ -1,31 +1,33 @@
-## Qué aporta este PR
+<!-- Write this PR in English, like everything else in this repository. See CONTRIBUTING.md#language. -->
 
-<!-- Qué conector, qué proveedor y qué capacidades. Enlaza la issue de propuesta. -->
+## What this PR adds
 
-## Seguridad
+<!-- Which connector, which provider, and which capabilities. Link the proposal issue. -->
 
-<!-- Esta sección es lo primero que se lee en la revisión. Responde a todo. -->
+## Security
 
-- Dominios declarados en el manifiesto y por qué son necesarios:
-- Credencial que pide al cliente, y con qué permisos mínimos:
-- Dependencias nuevas, si hay, y por qué no se pueden evitar:
-- Confirmo que el conector no accede a base de datos, disco, variables de entorno ni red fuera de `contexto.solicitar`: <!-- sí / no -->
-- Confirmo que ninguna traza contiene credenciales, correos, nombres ni valores de actividad: <!-- sí / no -->
-- Confirmo que los datos de ejemplo están anonimizados y no contienen ningún secreto: <!-- sí / no -->
+<!-- This section is the first thing read in review. Answer all of it. -->
 
-## Última actividad
+- Domains declared in the manifest, and why each one is needed:
+- Credential it asks the customer for, and the minimum permissions:
+- New dependencies, if any, and why they cannot be avoided:
+- I confirm the connector reaches no database, disk, environment variable, or network outside `context.request`: <!-- yes / no -->
+- I confirm no trace contains credentials, emails, names, or activity values: <!-- yes / no -->
+- I confirm the sample data is anonymised and contains no secrets: <!-- yes / no -->
 
-<!-- Si el conector no la declara, escribe "No la declara" y sigue. -->
+## Last activity
 
-- Campo del proveedor del que sale, con enlace a su documentación:
-- Qué mide exactamente y qué no mide:
-- Confirmo que no sustituyo el uso por la fecha de sincronización, de asignación ni por un acceso genérico: <!-- sí / no -->
-- Confirmo que sin dato se devuelve ausencia de información y que el valor no se persiste ni se registra: <!-- sí / no -->
+<!-- If the connector does not declare it, write "Not declared" and move on. -->
 
-## Validación realizada
+- The provider field it comes from, with a link to its documentation:
+- What it measures exactly, and what it does not measure:
+- I confirm I do not substitute usage with the sync date, the assignment date, or a generic sign-in: <!-- yes / no -->
+- I confirm that with no value absence of information is returned, and that the value is neither persisted nor logged: <!-- yes / no -->
 
-<!-- Resultado de `pnpm verificar`. Si has probado contra el proveedor real en tu entorno, cuéntalo aquí: qué comprobaste y qué salió. Nunca subas credenciales. -->
+## Validation performed
 
-## Documentación
+<!-- The result of `pnpm verify`. If you tested against the real provider in your own environment, say so here: what you checked and what came back. Never commit credentials. -->
 
-<!-- Qué has añadido al README del conector: credencial y permisos, permisos que NO hacen falta, límites conocidos. -->
+## Documentation
+
+<!-- What you added to the connector's README: credential and permissions, permissions that are NOT needed, known limits. -->

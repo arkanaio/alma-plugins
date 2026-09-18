@@ -1,36 +1,36 @@
-# Política de seguridad
+# Security policy
 
-## Comunicar un problema
+## Reporting a problem
 
-**No abras una issue pública.**
+**Do not open a public issue.**
 
-Usa el aviso privado de vulnerabilidades de GitHub, en la pestaña **Security** de este repositorio («Report a vulnerability»). Si no puedes, escribe a **jaume@arkana.io**.
+Use GitHub's private vulnerability reporting, under this repository's **Security** tab ("Report a vulnerability"). If you cannot, write to **jaume@arkana.io**.
 
-Incluye:
+Include:
 
-- Qué conector o qué parte del repositorio está afectada.
-- Qué permite hacer el problema.
-- Cómo reproducirlo.
-- Tu valoración del impacto, si la tienes.
+- Which connector or which part of the repository is affected.
+- What the problem allows someone to do.
+- How to reproduce it.
+- Your assessment of the impact, if you have one.
 
-Se acusa recibo en un plazo de 3 días laborables y se informa del estado al menos cada 7 días hasta el cierre. Cuando haya corrección, se publica la versión afectada y la corregida, y se reconoce a quien lo comunicó salvo que prefiera no aparecer.
+We acknowledge receipt within 3 working days and report status at least every 7 days until it is closed. When there is a fix, the affected and fixed versions are published, and the reporter is credited unless they prefer not to be.
 
-## Qué entra en esta política
+## What this policy covers
 
-- Un conector que habla con un dominio que no declara en su manifiesto.
-- Un conector que filtra una credencial, un dato personal o un valor de actividad en una traza, un error o un valor devuelto.
-- Un conector que accede a algo que el contexto de ejecución no le da.
-- Un secreto o un dato personal real subido a este repositorio, incluidos los datos de ejemplo.
-- Una dependencia comprometida o suplantada.
+- A connector talking to a domain it does not declare in its manifest.
+- A connector leaking a credential, personal data, or an activity value into a trace, an error, or a returned value.
+- A connector reaching something the execution context does not give it.
+- A secret or real personal data committed to this repository, sample data included.
+- A compromised or impersonated dependency.
 
-Un problema en el producto ALMA, no en un conector, va a [arkanaio/alma](https://github.com/arkanaio/alma).
+A problem in the ALMA product rather than in a connector goes to [arkanaio/alma](https://github.com/arkanaio/alma).
 
-## Qué no entra
+## What it does not cover
 
-- Fallos de funcionamiento sin consecuencia de seguridad. Esos van a una issue normal.
-- Vulnerabilidades en el sistema del proveedor. Comunícalas al proveedor.
-- Informes generados automáticamente sin comprobar, sin impacto demostrado.
+- Functional bugs with no security consequence. Those go to a normal issue.
+- Vulnerabilities in a provider's own system. Report those to the provider.
+- Automatically generated reports with no verification and no demonstrated impact.
 
-## Antes de subir nada
+## Before you commit anything
 
-No subas credenciales, tokens ni datos de personas reales, tampoco en los datos de ejemplo. Un secreto que llega a una rama pública se considera comprometido aunque se borre después: hay que rotarlo.
+Do not commit credentials, tokens, or real people's data, sample data included. A secret that reaches a public branch is considered compromised even if it is deleted afterwards: it has to be rotated.

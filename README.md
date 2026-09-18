@@ -1,48 +1,52 @@
 # alma-plugins
 
-Repositorio oficial de conectores de proveedor de [ALMA](https://github.com/arkanaio/alma).
+The official repository of provider connectors for [ALMA](https://github.com/arkanaio/alma).
 
-Un **conector** es una pieza que sabe hablar con un proveedor concreto y no sabe nada más. Recibe una configuración validada y una credencial, consulta al proveedor y devuelve los datos con un formato acordado. No conoce organizaciones, no tiene acceso a la base de datos de ALMA y no decide a quién pertenece un dato.
+A **connector** is a piece that knows how to talk to one specific provider and knows nothing else. It receives a validated configuration and a credential, queries the provider, and returns the data in an agreed shape. It does not know about organisations, it has no access to ALMA's database, and it never decides who a piece of data belongs to.
 
-En este repositorio «conector» y «plugin» son la misma cosa. El nombre del repositorio conserva el término «plugin» por continuidad con la documentación de producto; el resto de la documentación dice «conector».
+In this repository, "connector" and "plugin" mean the same thing. The repository name keeps "plugin" for continuity with the product documentation; everything else says "connector".
 
-## Estado
+## Status
 
-Fase C del [roadmap de ALMA](https://github.com/arkanaio/alma/blob/main/docs/ROADMAP.md), en curso. El contrato de `contrato/` es **provisional**: la definición común se cierra en [arkanaio/alma#364](https://github.com/arkanaio/alma/issues/364) y el proceso de revisión de seguridad en [arkanaio/alma#366](https://github.com/arkanaio/alma/issues/366). Un cambio incompatible del contrato se anuncia en [CONTRIBUTING.md](CONTRIBUTING.md) antes de aplicarse.
+Phase C of the [ALMA roadmap](https://github.com/arkanaio/alma/blob/main/docs/ROADMAP.md), in progress. The contract in `contract/` is **provisional**: the shared definition is settled in [arkanaio/alma#364](https://github.com/arkanaio/alma/issues/364) and the security review process in [arkanaio/alma#366](https://github.com/arkanaio/alma/issues/366). A breaking change to the contract is announced in [CONTRIBUTING.md](CONTRIBUTING.md) before it is applied.
 
-Hasta que esas dos tareas cierren, este repositorio **no acepta todavía aportaciones externas de conectores nuevos**. Sí acepta correcciones, dudas y propuestas de proveedor a través de una issue.
+Until those two close, this repository **does not yet accept external contributions of new connectors**. It does accept fixes, questions, and provider proposals through an issue.
 
-## Qué hay aquí
+## What is here
 
-| Ruta | Qué es |
+| Path | What it is |
 |---|---|
-| `contrato/` | Tipos y esquemas que definen qué es un conector y qué devuelve. |
-| `conectores/ejemplo/` | Conector de referencia, ejecutable, contra datos de ejemplo. Es la plantilla a copiar. |
-| `docs/CONTRATO.md` | El contrato explicado: capacidades, datos y límites. |
-| `docs/ACTIVIDAD.md` | La capacidad opcional de última actividad y sus reglas. |
-| `docs/DATOS-DE-EJEMPLO.md` | Cómo se prueba un conector sin conectarse a un proveedor real. |
-| `docs/REVISION-SEGURIDAD.md` | La lista de comprobación que pasa toda aportación. |
-| `docs/PUBLICACION.md` | Cómo llega un conector desde este repositorio a producción. |
+| `contract/` | The types and schemas that define what a connector is and what it returns. |
+| `connectors/example/` | The reference connector, runnable against sample data. It is the template to copy. |
+| `docs/CONTRACT.md` | The contract explained: capabilities, data, and boundaries. |
+| `docs/ACTIVITY.md` | The optional last-activity capability and its rules. |
+| `docs/SAMPLE-DATA.md` | How a connector is tested without reaching a real provider. |
+| `docs/SECURITY-REVIEW.md` | The checklist every contribution goes through. |
+| `docs/PUBLISHING.md` | How a connector gets from this repository into production. |
 
-## Empezar
+## Getting started
 
-Se necesita Node 24 y pnpm 11.
+You need Node 24 and pnpm 11.
 
 ```sh
 pnpm install
-pnpm verificar   # check de Biome, tipos y pruebas
+pnpm verify   # Biome check, types, and tests
 ```
 
-`pnpm verificar` no hace ninguna petición de red: todas las pruebas se ejecutan contra los datos de ejemplo de cada conector.
+`pnpm verify` makes no network requests: every test runs against each connector's sample data.
 
-## Contribuir
+## Contributing
 
-Lee [CONTRIBUTING.md](CONTRIBUTING.md). Toda aportación pasa por pruebas automáticas y por una revisión humana de seguridad antes de publicarse.
+Read [CONTRIBUTING.md](CONTRIBUTING.md). Every contribution goes through automated tests and a human security review before it is published.
 
-## Cómo se instala un conector
+## Language
 
-No se instala. Una organización cliente de ALMA configura sus credenciales y activa el conector desde el producto; en ningún momento sube ni ejecuta código por su cuenta. ALMA incorpora una versión concreta y revisada de cada conector a su despliegue. Ver [docs/PUBLICACION.md](docs/PUBLICACION.md).
+**Everything in this repository is written in English**: code, identifiers, comments, documentation, commit messages, issues, and pull requests. This is a public repository and its contributors are not all Spanish speakers. See [CONTRIBUTING.md](CONTRIBUTING.md#language).
 
-## Seguridad
+## How a connector gets installed
 
-Para comunicar un problema de seguridad, lee [SECURITY.md](SECURITY.md). No abras una issue pública.
+It does not. An ALMA customer organisation configures its credentials and enables the connector from the product; it never uploads or runs code of its own. ALMA takes one specific, reviewed version of each connector into its deployment. See [docs/PUBLISHING.md](docs/PUBLISHING.md).
+
+## Security
+
+To report a security problem, read [SECURITY.md](SECURITY.md). Do not open a public issue.

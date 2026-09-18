@@ -17,5 +17,5 @@
     "skipLibCheck": true,
     "noEmit": true
   },
-  "include": ["contrato/**/*.ts", "conectores/**/*.ts"]
+  "include": ["contract/**/*.ts", "connectors/**/*.ts"]
 }

@@ -1,103 +1,107 @@
-# Guía de contribución
+# Contributing
 
-Gracias por querer añadir un conector a ALMA. Esta guía dice qué se espera de una aportación y cómo se revisa.
+Thank you for wanting to add a connector to ALMA. This guide says what is expected of a contribution and how it is reviewed.
 
-Antes de escribir código, lee [docs/CONTRATO.md](docs/CONTRATO.md). Casi todo lo que se rechaza en revisión es código que no respeta la frontera del conector, y esa frontera es lo único que hace viable aceptar aportaciones externas: revisar una pieza que solo puede hablar con el proveedor que declara y devolver un formato conocido es rápido; revisar una pieza que pudiera tocar la base de datos no lo sería a ningún precio.
+Before writing any code, read [docs/CONTRACT.md](docs/CONTRACT.md). Almost everything rejected in review is code that does not respect the connector boundary, and that boundary is the only reason external contributions are viable at all: reviewing a piece that can only talk to the provider it declares and return a known shape is a bounded task; reviewing a piece that could touch the database would not be, at any price.
 
-## Antes de empezar
+## Before you start
 
-1. **Abre una issue de propuesta** con la plantilla «Proponer un conector nuevo». Se acuerda ahí el proveedor, sus capacidades y si hay un cliente real esperándolo. Un conector que llega sin propuesta previa puede quedarse sin revisar mucho tiempo.
-2. Comprueba que el proveedor ofrece una **vía programática** (API) para lo que quieres sincronizar. Si no la tiene, el camino no es este repositorio todavía: es la fase de conectores por automatización de navegador, que tiene otras reglas y otro nivel de soporte.
-3. Mientras [arkanaio/alma#364](https://github.com/arkanaio/alma/issues/364) y [arkanaio/alma#366](https://github.com/arkanaio/alma/issues/366) sigan abiertas, el contrato puede cambiar. Los cambios incompatibles se anuncian aquí, en la sección «Cambios del contrato», antes de aplicarse.
+1. **Open a proposal issue** using the "Propose a new connector" template. The provider, its capabilities, and whether a real customer is waiting for it are agreed there. A connector that arrives with no prior proposal may sit unreviewed for a long time.
+2. Check that the provider offers a **programmatic way** (an API) to read what you want to synchronise. If it does not, this repository is not the path yet: that is the browser-automation connector phase, which has different rules and a different support level.
+3. While [arkanaio/alma#364](https://github.com/arkanaio/alma/issues/364) and [arkanaio/alma#366](https://github.com/arkanaio/alma/issues/366) are open, the contract can change. Breaking changes are announced here, under "Contract changes", before they are applied.
 
-## Requisitos de una aportación
+## Language
 
-Un conector se acepta cuando cumple **todo** lo siguiente.
+**Everything in this repository is written in English.** Code, identifiers, comments, documentation, sample data, commit messages, issue titles and bodies, pull request descriptions, and review replies.
 
-### Estructura
+This is not a style preference. This is a public repository whose contributors and reviewers are not all Spanish speakers, and a connector that can only be reviewed by someone who reads Spanish is a connector with one possible reviewer. Identifiers that come from the provider keep the provider's own spelling, in whatever language the provider uses.
 
-Copia `conectores/ejemplo/` y renómbralo con el identificador de tu proveedor:
+The ALMA product repository is a separate, private codebase and keeps its own language conventions. They do not apply here, and this one does not apply there.
+
+## What a contribution must satisfy
+
+A connector is accepted when it meets **all** of the following.
+
+### Structure
+
+Copy `connectors/example/` and rename it after your provider's identifier:
 
 ```
-conectores/<proveedor>/
-├── README.md                 # qué sincroniza, qué credencial pide, sus límites
+connectors/<provider>/
+├── README.md              # what it syncs, what credential it needs, its limits
 ├── package.json
 ├── src/
-│   ├── manifiesto.ts         # la ficha que ALMA enseña al cliente
-│   ├── esquemas.ts           # configuración y respuestas del proveedor, en Zod
-│   └── conector.ts           # la implementación
-├── datos-de-ejemplo/         # respuestas reales anonimizadas del proveedor
+│   ├── manifest.ts        # the card ALMA shows the customer
+│   ├── schemas.ts         # configuration and provider responses, in Zod
+│   └── connector.ts       # the implementation
+├── sample-data/           # anonymised real responses from the provider
 └── tests/
 ```
 
-### Manifiesto
+### The manifest
 
-Declara el nombre, la descripción, el enlace a la documentación, las capacidades (`directorio`, `dispositivos`, `licencias`), el nivel de soporte, los dominios con los que habla, qué necesita la organización para configurarlo y si expone precio por puesto. El nivel de soporte de una aportación externa es `comunidad`, y se le muestra tal cual al cliente para que sepa qué tiene.
+Declare the name, description, documentation link, capabilities (`directory`, `devices`, `licenses`), support level, the domains it talks to, what the organisation needs in order to configure it, and whether it exposes a seat price. The support level of an external contribution is `community`, and it is shown to the customer as-is so they know what they have.
 
-Los `dominios` son un compromiso: el anfitrión rechaza cualquier petición a una máquina que no esté en esa lista. Declara los que realmente necesitas y ninguno más.
+`domains` is a commitment: the host rejects any request to a machine that is not on that list. Declare the ones you actually need and no others.
 
-### Lo que un conector no puede hacer, nunca
+### What a connector may never do
 
-- Acceder a la base de datos de ALMA, ni directamente ni a través de nada.
-- Decidir a qué organización pertenece un dato. Siempre recibe ese contexto ya resuelto.
-- Hablar con cualquier dirección que no sea la del proveedor que declara servir. Usa `contexto.solicitar`; no uses `fetch` global, ni `node:http`, ni un SDK que abra sus propias conexiones.
-- Leer variables de entorno, ficheros del disco o el reloj del sistema para tomar decisiones de negocio.
-- Ver la credencial de otra integración, ni devolver la suya propia al cliente, ni escribirla en una traza.
-- Escribir en el proveedor. Un conector lee. No crea, no modifica y no borra nada en el sistema del proveedor.
-- Añadir dependencias sin justificarlas. Cada dependencia nueva es superficie que hay que revisar, y se pregunta por ella en la revisión.
+- Reach ALMA's database, directly or through anything else.
+- Decide which organisation a piece of data belongs to. It always receives that context already resolved.
+- Talk to any address other than the provider it declares to serve. Use `context.request`; do not use global `fetch`, `node:http`, or an SDK that opens its own connections.
+- Read environment variables, files on disk, or the system clock to make a business decision.
+- See another integration's credential, return its own to the customer, or write it into a trace.
+- Write to the provider. A connector reads. It creates nothing, changes nothing, and deletes nothing in the provider's system.
+- Add dependencies without justifying them. Every new dependency is surface that has to be reviewed, and it will be asked about in review.
 
-### Datos
+### Data
 
-- **Valida toda respuesta del proveedor con Zod** antes de que su contenido llegue a ninguna otra parte del conector. Una respuesta que cambia de forma tiene que fallar ahí, no producir datos incorrectos más adelante.
-- **No inventes datos.** Si el proveedor no da un valor, devuelve `null`. Un importe sin moneda se descarta entero en vez de suponer la moneda de la organización.
-- **No clasifiques.** El conector entrega las cuentas tal cual; decidir si un puesto es huérfano es trabajo de ALMA, que es quien conoce a los empleados.
-- **Pagina.** Nunca cargues el catálogo entero en memoria.
-- **Distingue los errores.** Una credencial rechazada por el proveedor no se reintenta y deja la conexión en «requiere reautenticación»; un 429 o un 5xx sí es reintentable.
-- **Las trazas cuentan, no describen.** `contexto.registrar` sirve para números y estados. Nunca correos, nombres, identificadores personales, credenciales ni valores de actividad.
+- **Validate every provider response with Zod** before its contents reach any other part of the connector. A response that changes shape has to fail there, not produce wrong data further down.
+- **Do not invent data.** If the provider gives no value, return `null`. An amount with no currency is dropped whole rather than assuming the organisation's currency.
+- **Do not classify.** The connector hands over accounts as-is; deciding whether a seat is orphaned is ALMA's job, because ALMA is the one that knows the employees.
+- **Page.** Never load the whole catalogue into memory.
+- **Tell errors apart.** A credential the provider rejected is not retried and leaves the connection in "reauthentication required"; a 429 or a 5xx is retryable.
+- **Traces count, they do not describe.** `context.log` is for numbers and states. Never emails, names, personal identifiers, credentials, or activity values.
 
-### Última actividad
+### Last activity
 
-Es una capacidad **opcional**. Un conector de licencias que sincroniza contratos y puestos sin ofrecer actividad es perfectamente válido y se acepta igual.
+This is an **optional** capability. A license connector that synchronises contracts and seats without offering activity is perfectly valid and is accepted just the same.
 
-Si la declaras, tienes que documentar qué mide el proveedor y dónde deja de medir, y respetar reglas concretas sobre el dato. Están en [docs/ACTIVIDAD.md](docs/ACTIVIDAD.md) y se revisan una por una. Resumido: la fecha de sincronización, la de asignación o un acceso genérico a la cuenta **no** son uso de una licencia y no valen como sustituto; sin dato se devuelve ausencia de información, nunca inactividad inferida.
+If you declare it, you have to document what the provider measures and where it stops measuring, and respect specific rules about the value. They are in [docs/ACTIVITY.md](docs/ACTIVITY.md) and they are reviewed one by one. In short: a sync date, an assignment date, or a generic sign-in to the account are **not** usage of a license and cannot stand in for it; with no value you return absence of information, never inferred inactivity.
 
-### Pruebas
+### Tests
 
-Las pruebas de un conector se ejecutan **sin conectarse a ningún proveedor real**, contra los datos de ejemplo del propio conector. Ver [docs/DATOS-DE-EJEMPLO.md](docs/DATOS-DE-EJEMPLO.md).
+A connector's tests run **without reaching any real provider**, against the connector's own sample data. See [docs/SAMPLE-DATA.md](docs/SAMPLE-DATA.md).
 
-Como mínimo hay que cubrir: que el manifiesto es válido y coherente con el esquema de configuración, el recorrido completo de la paginación, un valor ausente del proveedor, una credencial rechazada, un fallo temporal del proveedor, una respuesta con una forma inesperada, que solo se habla con los dominios declarados y que la traza no filtra datos personales. `conectores/ejemplo/tests/conector.test.ts` tiene una de cada.
+At a minimum, cover: that the manifest is valid and consistent with the configuration schema, the full walk through pagination, a value the provider does not give, a rejected credential, a temporary provider failure, a differently shaped response, that only the declared domains are contacted, and that the trace leaks no personal data. `connectors/example/tests/connector.test.ts` has one of each.
 
-### Documentación
+### Documentation
 
-El `README.md` del conector explica, en castellano y sin tecnicismos innecesarios: qué sincroniza, qué credencial hay que crear en el proveedor y con qué permisos, qué permisos **no** hace falta conceder, y sus límites conocidos (cuotas, retardos, campos que el proveedor no ofrece).
+The connector's `README.md` explains, plainly: what it synchronises, what credential has to be created at the provider and with which permissions, which permissions are **not** needed, and its known limits (quotas, delays, fields the provider does not offer).
 
-## Cómo se envía
+## How to submit
 
-1. Bifurca el repositorio y trabaja en una rama.
-2. Ejecuta `pnpm verificar` antes de abrir el PR. CI ejecuta exactamente lo mismo.
-3. Abre el PR y completa la plantilla. La sección de seguridad no es una formalidad: es lo primero que se lee.
-4. Un PR que cambia `contrato/` o la configuración del repositorio se revisa aparte del conector que lo motivó. Sepáralos.
+1. Fork the repository and work on a branch.
+2. Run `pnpm verify` before opening the PR. CI runs exactly the same thing.
+3. Open the PR and fill in the template. The security section is not a formality: it is the first thing that gets read.
+4. A PR that changes `contract/` or the repository configuration is reviewed separately from the connector that motivated it. Split them.
 
-## Cómo se revisa
+## How it is reviewed
 
-Toda aportación pasa, en este orden:
+Every contribution goes through, in this order:
 
-1. **Pruebas automáticas** en CI contra los datos de ejemplo.
-2. **Revisión humana de seguridad**, con la lista de [docs/REVISION-SEGURIDAD.md](docs/REVISION-SEGURIDAD.md). Es obligatoria y ningún conector se publica sin ella, tampoco los de arkana.
-3. **Publicación de una versión** concreta, que es la que ALMA incorpora a su despliegue. Ver [docs/PUBLICACION.md](docs/PUBLICACION.md).
+1. **Automated tests** in CI against the sample data.
+2. **A human security review**, using the checklist in [docs/SECURITY-REVIEW.md](docs/SECURITY-REVIEW.md). It is mandatory and no connector is published without it, arkana's own included.
+3. **A published version**, which is the one ALMA takes into its deployment. See [docs/PUBLISHING.md](docs/PUBLISHING.md).
 
-La revisión de seguridad puede pedir cambios que no son defectos de funcionamiento: reducir dependencias, estrechar dominios, quitar un campo de una traza. No es desconfianza hacia quien aporta; es que el coste de equivocarse aquí lo paga un cliente.
+The security review may ask for changes that are not functional defects: fewer dependencies, narrower domains, a field removed from a trace. That is not distrust of the contributor; it is that the cost of getting this wrong is paid by a customer.
 
-## Idioma
+## Contract changes
 
-El código, los comentarios, la documentación y los mensajes de commit se escriben en castellano. Los identificadores que vienen del proveedor se dejan como el proveedor los llama.
+Breaking changes to `contract/` are announced here before they are applied, with the date and what has to change in an existing connector.
 
-## Cambios del contrato
+- No changes yet. The initial contract is provisional until [arkanaio/alma#364](https://github.com/arkanaio/alma/issues/364) closes.
 
-Los cambios incompatibles de `contrato/` se anuncian aquí antes de aplicarse, con la fecha y qué hay que tocar en un conector existente.
+## Security
 
-- Sin cambios todavía. El contrato inicial es provisional hasta que cierre [arkanaio/alma#364](https://github.com/arkanaio/alma/issues/364).
-
-## Seguridad
-
-Si encuentras un problema de seguridad, **no abras una issue**. Sigue [SECURITY.md](SECURITY.md).
+If you find a security problem, **do not open an issue**. Follow [SECURITY.md](SECURITY.md).

@@ -1,17 +1,17 @@
 import { z } from "zod";
 
-// Configuracion que rellena la organizacion, validada antes de cualquier
-// peticion. Los campos declarados en el manifiesto y este esquema tienen que
-// coincidir: la prueba de manifiesto lo comprueba.
-export const configuracionSchema = z.object({
-  espacio: z.string().min(1).max(64),
+// The configuration the organisation fills in, validated before any request.
+// The fields declared in the manifest and this schema have to match: the
+// manifest test checks it.
+export const configurationSchema = z.object({
+  workspace: z.string().min(1).max(64),
 });
-export type Configuracion = z.infer<typeof configuracionSchema>;
+export type Configuration = z.infer<typeof configurationSchema>;
 
-// Respuestas del proveedor. Se validan siempre antes de que su contenido llegue
-// a ninguna otra parte del conector: una respuesta que cambia de forma tiene
-// que fallar aqui, no producir datos incorrectos mas adelante.
-export const respuestaDeSuscripcionesSchema = z.object({
+// Provider responses. Always validated before their contents reach any other
+// part of the connector: a response that changes shape has to fail here, not
+// produce wrong data further down.
+export const subscriptionsResponseSchema = z.object({
   subscriptions: z.array(
     z.object({
       id: z.string().min(1),
@@ -27,7 +27,7 @@ export const respuestaDeSuscripcionesSchema = z.object({
   next_cursor: z.string().min(1).nullable(),
 });
 
-export const respuestaDeMiembrosSchema = z.object({
+export const membersResponseSchema = z.object({
   members: z.array(
     z.object({
       id: z.string().min(1),

@@ -4,37 +4,37 @@
       {
         "id": "usr_001",
         "subscription_id": "sub_001",
-        "email": "ana.torres@ejemplo.test",
-        "display_name": "Ana Torres",
+        "email": "first.owner@example.test",
+        "display_name": "First Owner",
         "status": "active",
         "last_active_at": "2026-09-16T08:12:00Z"
       },
       {
         "id": "usr_002",
         "subscription_id": "sub_001",
-        "email": "exempleado@ejemplo.test",
-        "display_name": "Cuenta sin responsable",
+        "email": "former.employee@example.test",
+        "display_name": "Account With No Owner",
         "status": "active",
         "last_active_at": "2026-02-03T17:45:00Z"
       },
       {
         "id": "usr_003",
         "subscription_id": "sub_001",
-        "email": "pendiente@ejemplo.test",
+        "email": "pending.invite@example.test",
         "display_name": null,
         "status": "invited",
         "last_active_at": null
       }
     ],
-    "next_cursor": "pagina-2"
+    "next_cursor": "page-2"
   },
-  "pagina-2": {
+  "page-2": {
     "members": [
       {
         "id": "usr_004",
         "subscription_id": "sub_002",
-        "email": "luis.perez@ejemplo.test",
-        "display_name": "Luis Perez",
+        "email": "second.owner@example.test",
+        "display_name": "Second Owner",
         "status": "suspended",
         "last_active_at": null
       }

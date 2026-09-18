@@ -3,7 +3,7 @@
     "subscriptions": [
       {
         "id": "sub_001",
-        "product": "Ejemplo Pro",
+        "product": "Example Pro",
         "plan": "Business",
         "seats": 25,
         "unit_price": "12.50",
@@ -13,7 +13,7 @@
       },
       {
         "id": "sub_002",
-        "product": "Ejemplo Analytics",
+        "product": "Example Analytics",
         "plan": null,
         "seats": 5,
         "unit_price": "180.00",
@@ -22,13 +22,13 @@
         "renews_on": "2026-11-15"
       }
     ],
-    "next_cursor": "pagina-2"
+    "next_cursor": "page-2"
   },
-  "pagina-2": {
+  "page-2": {
     "subscriptions": [
       {
         "id": "sub_003",
-        "product": "Ejemplo Storage",
+        "product": "Example Storage",
         "plan": "Starter",
         "seats": null,
         "unit_price": null,

@@ -1,5 +1,5 @@
 {
-  "name": "@alma/contrato-conector",
+  "name": "@alma/connector-contract",
   "version": "0.0.0",
   "private": true,
   "type": "module",
