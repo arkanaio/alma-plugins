@@ -39,6 +39,48 @@ Identifiers that come from a provider keep the provider's own spelling.
 The ALMA product repository is a separate, private codebase with its own
 language conventions. They do not apply here, and this one does not apply there.
 
+## License and sign-off
+
+Everything here is under the [Apache License 2.0](LICENSE): the contract, the
+connectors written by arkana, and the ones contributed from outside. One license
+for the whole repository, with no per-connector exception, because a repository
+whose directories carry different terms is one nobody can fork, package or
+review without asking a lawyer first.
+
+Apache 2.0 rather than MIT for the reason that matters once a customer's
+deployment runs this code: it grants a patent license from every contributor
+(section 3), and its section 5 says that what you contribute is licensed under
+these same terms unless you state otherwise. That second point is why **there is
+no CLA to sign**. The license already says it.
+
+What is asked instead is one line per commit:
+
+```sh
+git commit -s
+```
+
+That appends `Signed-off-by: Your Name <you@example.com>`, and it means what the
+[Developer Certificate of Origin 1.1](https://developercertificate.org/) says:
+the code is yours to contribute, or you took it from somewhere whose license
+allows it, and you know the commit is public and permanent. It answers the one
+question a security review cannot answer by reading the diff — whether the code
+was the contributor's to give — and the usual reason it turns out badly is a file
+pasted out of a provider's own SDK.
+
+CI checks it on every pull request, in the `dco` job. If you forgot:
+
+```sh
+git rebase --signoff <the commit your branch started from>
+git push --force-with-lease
+```
+
+The name and email in the sign-off have to be the ones you commit with.
+
+The published contract, `@arkanaio/connector-contract`, is under this same
+license, and carries its own copy of it in the package. Nothing about ALMA
+itself is licensed here: the product is a separate, private codebase, and
+consuming an Apache 2.0 package does not change that.
+
 ## One connector, one capability set, one package
 
 A connector declares the capabilities it actually implements and nothing more.
@@ -140,9 +182,11 @@ the known limits: quotas, delays, fields the provider does not offer.
 ## How to submit
 
 1. Fork the repository and work on a branch.
-2. Run `pnpm verify` before opening the PR. CI runs the same thing.
-3. Fill in the template. The security section is read first.
-4. A PR that changes `contract/` or the repository configuration is reviewed
+2. Sign off every commit with `git commit -s`. CI checks it, and a pull request
+   without it is not reviewed. See [License and sign-off](#license-and-sign-off).
+3. Run `pnpm verify` before opening the PR. CI runs the same thing.
+4. Fill in the template. The security section is read first.
+5. A PR that changes `contract/` or the repository configuration is reviewed
    separately from the connector that motivated it. Split them.
 
 ## How it is reviewed and published

@@ -2,6 +2,7 @@
   "name": "@arkanaio/connector-example",
   "version": "1.0.0",
   "description": "Reference connector for ALMA. It talks to no real provider.",
+  "license": "Apache-2.0",
   "private": true,
   "type": "module",
   "exports": {
