@@ -27,6 +27,7 @@ jobs:
       # Without --frozen-lockfile a contribution could resolve versions other
       # than the reviewed ones.
       - run: pnpm install --frozen-lockfile
+      - run: pnpm build
       - run: pnpm biome ci .
       - run: pnpm tsc --noEmit
       # Tests run against each connector's sample data. This job holds no

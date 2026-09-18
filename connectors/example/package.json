@@ -1,13 +1,14 @@
 {
-  "name": "@alma/connector-example",
-  "version": "0.0.0",
+  "name": "@arkanaio/connector-example",
+  "version": "1.0.0",
+  "description": "Reference connector for ALMA. It talks to no real provider.",
   "private": true,
   "type": "module",
   "exports": {
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@alma/connector-contract": "workspace:*",
-    "zod": "4.1.13"
+    "@arkanaio/connector-contract": "workspace:*",
+    "zod": "^4.1.13"
   }
 }

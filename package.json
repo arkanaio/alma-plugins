@@ -9,11 +9,12 @@
     "pnpm": ">=11 <12"
   },
   "scripts": {
+    "build": "pnpm --filter @arkanaio/connector-contract build",
     "check": "biome check .",
     "check:write": "biome check --write .",
     "typecheck": "tsc --noEmit",
     "test": "node --test \"contract/tests/*.test.ts\" \"connectors/*/tests/*.test.ts\"",
-    "verify": "pnpm check && pnpm typecheck && pnpm test"
+    "verify": "pnpm build && pnpm check && pnpm typecheck && pnpm test"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.7",

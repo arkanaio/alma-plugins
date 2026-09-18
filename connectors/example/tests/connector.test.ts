@@ -1,118 +1,161 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { validateManifest } from "@alma/connector-contract";
+import {
+  type ConnectorContext,
+  ConnectorError,
+  type ConnectorLicensePage,
+  connectorLicensePageSchema,
+  connectorManifestSchema,
+} from "@arkanaio/connector-contract";
 
-import { exampleConnector, ProviderError } from "../src/connector.ts";
+import { exampleConnector } from "../src/connector.ts";
 import { manifest } from "../src/manifest.ts";
-import { configurationSchema } from "../src/schemas.ts";
 import { createHost } from "./host.ts";
 
+function read(
+  context: ConnectorContext,
+  cursor: string | null = null,
+): Promise<ConnectorLicensePage> {
+  const reader = exampleConnector.readers.licenses;
+  assert.ok(reader, "The connector declares the licenses capability.");
+  return reader({ context, cursor });
+}
+
+async function failsWith(
+  options: { status?: number; body?: string },
+  expected: { code: string; kind: string; retryable: boolean },
+) {
+  const { context } = await createHost(options);
+  await assert.rejects(read(context), (error: unknown) => {
+    assert.ok(error instanceof ConnectorError);
+    assert.equal(error.kind, expected.kind);
+    assert.equal(error.code, expected.code);
+    assert.equal(error.retryable, expected.retryable);
+    return true;
+  });
+}
+
 test("the manifest satisfies the contract", () => {
-  assert.equal(validateManifest(manifest).id, "example");
+  assert.equal(connectorManifestSchema.parse(manifest).id, "example_licenses");
 });
 
-test("every field declared in the manifest exists in the schema", () => {
-  const declared = manifest.configuration.map((field) => field.key);
-  const validated = Object.keys(configurationSchema.shape);
-  assert.deepEqual([...declared].sort(), [...validated].sort());
+test("it declares licenses only, not directory", () => {
+  assert.deepEqual([...manifest.capabilities], ["licenses"]);
 });
 
-test("walks every page of contracts", async () => {
+test("every page it returns satisfies the agreed shape", async () => {
   const { context } = await createHost();
-  const first = await exampleConnector.listContracts(context, null);
-  assert.equal(first.items.length, 2);
-  assert.equal(first.cursor, "page-2");
+  const page = await read(context);
+  assert.doesNotThrow(() => connectorLicensePageSchema.parse(page));
+});
 
-  const second = await exampleConnector.listContracts(context, first.cursor);
-  assert.equal(second.items.length, 1);
+test("walks every page", async () => {
+  const { context } = await createHost();
+  const first = await read(context);
+  assert.equal(first.seats.length, 3);
+  assert.equal(first.cursor, "page_2");
+
+  const second = await read(context, first.cursor);
+  assert.equal(second.seats.length, 1);
   assert.equal(second.cursor, null);
 });
 
 test("drops a price with no currency instead of assuming one", async () => {
   const { context } = await createHost();
-  const page = await exampleConnector.listContracts(context, "page-2");
-  assert.equal(page.items[0]?.seatPrice, null);
+  const page = await read(context);
+  const storage = page.plans.find((plan) => plan.externalId === "plan_storage");
+  assert.equal(storage?.pricePerSeat, null);
+  assert.equal(storage?.currency, null);
 });
 
-test("reports the billing cycle the contract expects", async () => {
+test("hands over seats without deciding whether they are orphaned", async () => {
   const { context } = await createHost();
-  const page = await exampleConnector.listContracts(context, null);
-  assert.equal(page.items[0]?.billingCycle, "monthly");
-  assert.equal(page.items[1]?.billingCycle, "yearly");
+  const page = await read(context);
+  // The connector reports the account, not the employee: there is no field in
+  // which it could say one is orphaned even if it wanted to.
+  assert.deepEqual(Object.keys(page.seats[0] ?? {}).sort(), [
+    "accountEmail",
+    "accountExternalId",
+    "accountName",
+    "lastActivityAt",
+    "planExternalId",
+  ]);
 });
 
-test("hands over seats as-is, without deciding if they are orphaned", async () => {
+test("a seat with no activity value reports no value", async () => {
   const { context } = await createHost();
-  const page = await exampleConnector.listSeats(context, null);
-  assert.deepEqual(
-    page.items.map((seat) => seat.status),
-    ["active", "active", "invited"],
+  const page = await read(context);
+  const invited = page.seats.find((seat) => seat.accountExternalId === "acc_3");
+  assert.equal(invited?.lastActivityAt, null);
+});
+
+test("it reports the provider's date and never a date of its own", async () => {
+  const { context } = await createHost();
+  const page = await read(context);
+  const owner = page.seats.find((seat) => seat.accountExternalId === "acc_1");
+  // The moment of the read is ALMA's to stamp, from `now`. The connector only
+  // repeats what the provider said.
+  assert.equal(owner?.lastActivityAt, "2026-09-16T08:12:00.000Z");
+});
+
+test("only talks to the hosts it declares", async () => {
+  const { context, requests } = await createHost();
+  await read(context);
+  assert.ok(requests.length > 0);
+  for (const request of requests) {
+    assert.equal(new URL(request.url).hostname, "api.example.invalid");
+  }
+  await assert.rejects(
+    context.fetch("https://collector.invalid/steal"),
+    (error: unknown) =>
+      error instanceof ConnectorError && error.code === "forbidden_host",
   );
 });
 
-test("a seat with no activity value returns absence of information", async () => {
-  const { context } = await createHost();
-  const page = await exampleConnector.listSeats(context, null);
-  const invited = page.items.find((seat) => seat.status === "invited");
-  assert.equal(invited?.lastActivity, null);
-});
-
-test("keeps the provider date apart from the moment of the read", async () => {
-  const { context } = await createHost();
-  const page = await exampleConnector.listSeats(context, null);
-  const activity = page.items[0]?.lastActivity;
-  assert.equal(activity?.providerDate, "2026-09-16T08:12:00Z");
-  assert.ok(activity?.readAt);
-  assert.notEqual(activity?.readAt, activity?.providerDate);
-});
-
-test("only talks to the declared domains", async () => {
-  const { context, requestedUrls } = await createHost();
-  await exampleConnector.listSeats(context, null);
-  assert.ok(requestedUrls.length > 0);
-  for (const url of requestedUrls) {
-    assert.equal(new URL(url).hostname, "api.example.test");
-  }
-});
-
-test("the trace carries no personal data and no activity", async () => {
-  const { context, traces } = await createHost();
-  await exampleConnector.listSeats(context, null);
-  const text = JSON.stringify(traces);
-  for (const forbidden of [
-    "first.owner@example.test",
-    "First Owner",
-    "2026-09-16",
-    "test-token",
-  ]) {
-    assert.ok(!text.includes(forbidden), `The trace leaked ${forbidden}.`);
-  }
+test("sends the credential in a header and never in the address", async () => {
+  const { context, requests } = await createHost();
+  await read(context);
+  const request = requests[0];
+  assert.equal(request?.headers.get("authorization"), "Bearer test-token");
+  assert.ok(!request?.url.includes("test-token"));
 });
 
 test("a rejected credential is not retried", async () => {
-  const { context } = await createHost({ status: 401 });
-  await assert.rejects(
-    exampleConnector.verifyAccess(context),
-    (error: unknown) =>
-      error instanceof ProviderError && error.retryable === false,
+  await failsWith(
+    { status: 401 },
+    { code: "rejected", kind: "credentials", retryable: false },
+  );
+});
+
+test("a missing permission is reported as such", async () => {
+  await failsWith(
+    { status: 403 },
+    { code: "seats_scope_missing", kind: "permissions", retryable: false },
   );
 });
 
 test("a temporary provider failure is retryable", async () => {
-  const { context } = await createHost({ status: 503 });
-  await assert.rejects(
-    exampleConnector.verifyAccess(context),
-    (error: unknown) =>
-      error instanceof ProviderError && error.retryable === true,
+  await failsWith(
+    { status: 503 },
+    { code: "provider_unavailable", kind: "service", retryable: true },
   );
 });
 
 test("a differently shaped response fails instead of producing wrong data", async () => {
-  const { context } = await createHost();
-  const broken = {
-    ...context,
-    request: async () => Response.json({ subscriptions: [{ id: 1 }] }),
-  };
-  await assert.rejects(exampleConnector.listContracts(broken, null));
+  await failsWith(
+    { body: JSON.stringify({ members: [{ id: 1 }] }) },
+    { code: "unexpected_payload", kind: "contract", retryable: false },
+  );
+});
+
+test("the failure never carries the provider's response", async () => {
+  const leak = JSON.stringify({ members: [{ secret: "s3cr3t-value" }] });
+  const { context } = await createHost({ body: leak });
+  await assert.rejects(read(context), (error: unknown) => {
+    assert.ok(error instanceof ConnectorError);
+    assert.equal(error.message, "contract:unexpected_payload");
+    assert.ok(!error.message.includes("s3cr3t-value"));
+    return true;
+  });
 });

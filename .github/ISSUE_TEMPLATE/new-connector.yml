@@ -13,14 +13,22 @@ body:
       placeholder: Slack, Figma, Atlassian...
     validations:
       required: true
-  - type: checkboxes
-    id: capabilities
+  - type: dropdown
+    id: capability
     attributes:
-      label: Capabilities it would synchronise
+      label: Capability it would synchronise
+      description: One connector declares one capability set. If the provider offers more than one, that is normally a separate connector in a separate package, because the incorporation record approves capabilities and hosts as a single surface.
       options:
-        - label: Licenses (contracts and occupied seats)
-        - label: Directory (list of employees)
-        - label: Devices (equipment inventory)
+        - Licenses (plans and occupied seats)
+        - Directory (list of employees)
+        - Devices (equipment inventory)
+    validations:
+      required: true
+  - type: textarea
+    id: hosts
+    attributes:
+      label: Hosts it would need to talk to
+      description: The exact host names, one per line. This becomes the connector's allowedHosts, and ALMA refuses any request outside it.
     validations:
       required: true
   - type: input
@@ -34,7 +42,7 @@ body:
     id: credential
     attributes:
       label: Credential and permissions
-      description: What has to be created at the provider, and the minimum read-only permissions it needs.
+      description: What has to be created at the provider, and the minimum read-only permissions it needs. For OAuth, list the exact scopes.
     validations:
       required: true
   - type: dropdown

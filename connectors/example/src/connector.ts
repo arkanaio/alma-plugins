@@ -1,130 +1,88 @@
-import type {
-  ExecutionContext,
-  LicenseConnector,
-  LicenseContract,
-  LicenseSeat,
-  OutboundRequest,
-  Page,
-} from "@alma/connector-contract";
+import {
+  type ConnectorContext,
+  type ConnectorDefinition,
+  ConnectorError,
+  defineConnector,
+} from "@arkanaio/connector-contract";
 
 import { manifest } from "./manifest.ts";
-import {
-  type Configuration,
-  configurationSchema,
-  membersResponseSchema,
-  subscriptionsResponseSchema,
-} from "./schemas.ts";
+import { seatsResponseSchema } from "./schemas.ts";
 
-const base = "https://api.example.test/v1";
+const base = "https://api.example.invalid/v1";
 
-/** The provider's opaque cursor. null means there are no more pages. */
-type Cursor = string;
-
-class ProviderError extends Error {
-  readonly retryable: boolean;
-
-  constructor(message: string, retryable: boolean) {
-    super(message);
-    this.name = "ProviderError";
-    this.retryable = retryable;
+async function readSeatsPage(context: ConnectorContext, cursor: string | null) {
+  const url = new URL(`${base}/seats`);
+  url.searchParams.set("workspace", context.configuration.workspace ?? "");
+  if (context.configuration.region !== null) {
+    url.searchParams.set("region", context.configuration.region ?? "");
   }
-}
+  if (cursor !== null) url.searchParams.set("cursor", cursor);
 
-async function readJson(
-  context: ExecutionContext<Configuration>,
-  input: OutboundRequest,
-): Promise<unknown> {
-  const response = await context.request(input);
-  if (response.status === 401 || response.status === 403) {
-    // The host turns this into "reauthentication required". The connector does
-    // not retry a credential the provider has already rejected.
-    throw new ProviderError("The provider rejected the credential.", false);
+  const response = await context.fetch(url.toString(), {
+    headers: {
+      accept: "application/json",
+      // The credential goes in a header. In the address it would end up in
+      // every log of the request.
+      authorization: `Bearer ${context.secrets.api_token}`,
+    },
+  });
+
+  if (response.status === 401) {
+    // A credential the provider has already rejected is not retried: ALMA
+    // marks the connection as needing reauthentication.
+    throw new ConnectorError("credentials", "rejected");
+  }
+  if (response.status === 403) {
+    throw new ConnectorError("permissions", "seats_scope_missing");
   }
   if (response.status === 429 || response.status >= 500) {
-    throw new ProviderError(`The provider answered ${response.status}.`, true);
+    throw new ConnectorError("service", "provider_unavailable");
   }
   if (!response.ok) {
-    throw new ProviderError(`The provider answered ${response.status}.`, false);
+    throw new ConnectorError("contract", "unexpected_status");
   }
-  return await response.json();
-}
 
-function route(
-  context: ExecutionContext<Configuration>,
-  resource: string,
-  cursor: Cursor | null,
-): OutboundRequest {
-  const url = new URL(`${base}/${resource}`);
-  url.searchParams.set("workspace", context.configuration.workspace);
-  if (cursor) url.searchParams.set("cursor", cursor);
-  return {
-    url: url.toString(),
-    method: "GET",
-    headers: { accept: "application/json" },
-  };
-}
-
-export const exampleConnector: LicenseConnector<Configuration, Cursor> = {
-  manifest,
-  configurationSchema,
-
-  async verifyAccess(context) {
-    await readJson(context, route(context, "subscriptions", null));
-  },
-
-  async listContracts(context, cursor): Promise<Page<LicenseContract, Cursor>> {
-    const body = subscriptionsResponseSchema.parse(
-      await readJson(context, route(context, "subscriptions", cursor)),
-    );
-    context.log("Read a page of contracts", {
-      contracts: body.subscriptions.length,
+  // The provider's body never travels inside the error: the parse failure is
+  // reported as a code, and the original stays in `cause` for local debugging.
+  const parsed = seatsResponseSchema.safeParse(await response.json());
+  if (!parsed.success) {
+    throw new ConnectorError("contract", "unexpected_payload", {
+      cause: parsed.error,
     });
-    return {
-      items: body.subscriptions.map((subscription) => ({
-        externalId: subscription.id,
-        product: subscription.product,
-        plan: subscription.plan,
-        totalSeats: subscription.seats,
-        // An amount without a currency is not an amount: drop it whole rather
-        // than assume the organisation's currency.
-        seatPrice:
-          subscription.unit_price && subscription.currency
-            ? {
-                amount: subscription.unit_price,
-                currency: subscription.currency,
-              }
-            : null,
-        billingCycle: subscription.billing_cycle,
-        renewsOn: subscription.renews_on,
-      })),
-      cursor: body.next_cursor,
-    };
-  },
+  }
+  return parsed.data;
+}
 
-  async listSeats(context, cursor): Promise<Page<LicenseSeat, Cursor>> {
-    const readAt = new Date().toISOString();
-    const body = membersResponseSchema.parse(
-      await readJson(context, route(context, "members", cursor)),
-    );
-    // The trace counts seats, never who holds them.
-    context.log("Read a page of seats", { seats: body.members.length });
-    return {
-      items: body.members.map((member) => ({
-        externalId: member.id,
-        contractExternalId: member.subscription_id,
-        email: member.email,
-        displayName: member.display_name,
-        status: member.status,
-        // No value from the provider means no reading. It is not replaced by
-        // the sync date or the assignment date, and the account is never
-        // inferred to be inactive.
-        lastActivity: member.last_active_at
-          ? { providerDate: member.last_active_at, readAt }
-          : null,
-      })),
-      cursor: body.next_cursor,
-    };
-  },
-};
+export const exampleConnector: ConnectorDefinition = defineConnector({
+  manifest,
+  readers: {
+    licenses: async ({ context, cursor }) => {
+      const body = await readSeatsPage(context, cursor);
 
-export { ProviderError };
+      return {
+        cursor: body.next_cursor,
+        plans: body.subscriptions.map((subscription) => ({
+          billingCycle: subscription.billing_cycle,
+          // An amount without a currency is not an amount: it is dropped whole
+          // rather than assuming the organisation's currency.
+          currency: subscription.unit_price ? subscription.currency : null,
+          externalId: subscription.id,
+          name: subscription.product,
+          pricePerSeat: subscription.currency ? subscription.unit_price : null,
+          seatCount: subscription.seats,
+        })),
+        seats: body.members.map((member) => ({
+          accountEmail: member.email,
+          accountExternalId: member.id,
+          accountName: member.display_name,
+          // No value from the provider means no reading. It is not replaced by
+          // the sync date or the assignment date, and the account is never
+          // inferred to be inactive: ALMA turns this into "unavailable", which
+          // is not the same claim as "not used".
+          lastActivityAt: member.last_active_at,
+          planExternalId: member.subscription_id,
+        })),
+      };
+    },
+  },
+});

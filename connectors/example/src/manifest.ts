@@ -1,33 +1,62 @@
-import type { Manifest } from "@alma/connector-contract";
-
-export const manifest: Manifest = {
-  id: "example",
-  name: "Example provider",
-  description:
-    "Reference connector. It talks to no real provider: it exists so the contribution guide has a runnable example.",
-  documentation:
-    "https://github.com/arkanaio/alma-plugins/tree/main/connectors/example",
+/**
+ * The card ALMA shows the customer.
+ *
+ * It declares licenses only. A directory connector for the same provider would
+ * be a separate connector with its own package: the incorporation record
+ * approves capabilities and hosts as a single surface, so keeping them apart
+ * keeps each approval to the minimum it actually needs.
+ */
+export const manifest = {
+  activity: {
+    documentationUrl: "https://example.invalid/docs/activity",
+    limitations:
+      "The provider aggregates activity by day, so a session today can take up to 24 hours to appear. It does not tell real usage apart from sessions opened by integrations.",
+    measures:
+      "The last time the account opened a document in the workspace, from the provider's last_active_at field.",
+  },
+  allowedHosts: ["api.example.invalid"],
+  authentication: {
+    fields: [
+      {
+        help: "Created under Settings, API, with read-only access.",
+        key: "api_token",
+        label: "API token",
+        maximumLength: 200,
+      },
+    ],
+    kind: "secret",
+  },
   capabilities: ["licenses"],
-  support: "official",
-  domains: ["api.example.test"],
   configuration: [
     {
+      help: "The identifier the provider gives the workspace.",
       key: "workspace",
-      label: "Workspace identifier",
-      help: "It appears in the URL of the provider's admin panel.",
-      type: "text",
+      kind: "text",
+      label: "Workspace",
+      maximumLength: 100,
+      options: null,
       required: true,
     },
+    {
+      help: null,
+      key: "region",
+      kind: "select",
+      label: "Region",
+      maximumLength: 10,
+      options: [
+        { label: "Europe", value: "eu" },
+        { label: "United States", value: "us" },
+      ],
+      required: false,
+    },
   ],
-  exposesSeatPrice: true,
-  // The example provider does publish activity, so the connector declares it
-  // and documents exactly what it measures. A license connector without
-  // activity is just as valid: { supported: false } would be enough.
-  activity: {
-    supported: true,
-    measures:
-      "The last time the account produced an action inside the product, from the provider's last_active_at field.",
-    limitations:
-      "Daily granularity and up to 24 hours of delay. It does not tell real usage apart from sessions opened by integrations. Invited accounts that never signed in are not reported.",
-  },
-};
+  description:
+    "Reference connector. It talks to no real provider and exists so the contribution guide has a runnable example.",
+  documentationUrl:
+    "https://github.com/arkanaio/alma-plugins/tree/main/connectors/example",
+  id: "example_licenses",
+  name: "Example",
+  pricing: { exposesBillingCycle: true, exposesPricePerSeat: true },
+  supportLevel: "official",
+  version: "1.0.0",
+} as const;

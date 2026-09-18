@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "es2024",
-    "lib": ["es2024"],
+    "lib": ["es2024", "dom"],
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "types": ["node"],
@@ -17,5 +17,6 @@
     "skipLibCheck": true,
     "noEmit": true
   },
-  "include": ["contract/**/*.ts", "connectors/**/*.ts"]
+  "include": ["contract/**/*.ts", "connectors/**/*.ts"],
+  "exclude": ["**/dist/**", "**/node_modules/**"]
 }

@@ -1,0 +1,38 @@
+name: Publish
+
+# Publishing is deliberately manual. A connector reaches ALMA because someone
+# reviewed it and wrote its incorporation record, so the version that leaves
+# this repository is a decision, never the side effect of a merge.
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        description: The workspace package to publish.
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    name: publish
+    runs-on: ubuntu-latest
+    environment: publish
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: https://npm.pkg.github.com
+          scope: "@arkanaio"
+      - run: pnpm install --frozen-lockfile
+      # Nothing is published that has not passed the same checks as a PR.
+      - run: pnpm verify
+      - name: Publish the package
+        run: pnpm --filter ${{ inputs.package }} publish --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

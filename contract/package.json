@@ -1,12 +1,30 @@
 {
-  "name": "@alma/connector-contract",
-  "version": "0.0.0",
-  "private": true,
+  "name": "@arkanaio/connector-contract",
+  "version": "0.1.0",
+  "description": "The shared definition of a provider connector for ALMA.",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arkanaio/alma-plugins.git",
+    "directory": "contract"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig.build.json"
   },
   "dependencies": {
-    "zod": "4.1.13"
+    "zod": "^4.1.13"
   }
 }

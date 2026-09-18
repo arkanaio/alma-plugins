@@ -1,0 +1,63 @@
+{
+  "": {
+    "subscriptions": [
+      {
+        "id": "plan_pro",
+        "product": "Example Pro",
+        "seats": 25,
+        "unit_price": "12.50",
+        "currency": "EUR",
+        "billing_cycle": "monthly"
+      },
+      {
+        "id": "plan_storage",
+        "product": "Example Storage",
+        "seats": null,
+        "unit_price": "9.00",
+        "currency": null,
+        "billing_cycle": null
+      }
+    ],
+    "members": [
+      {
+        "id": "acc_1",
+        "subscription_id": "plan_pro",
+        "email": "first.owner@example.invalid",
+        "display_name": "First Owner",
+        "status": "active",
+        "last_active_at": "2026-09-16T08:12:00.000Z"
+      },
+      {
+        "id": "acc_2",
+        "subscription_id": "plan_pro",
+        "email": "former.employee@example.invalid",
+        "display_name": null,
+        "status": "active",
+        "last_active_at": "2026-02-03T17:45:00.000Z"
+      },
+      {
+        "id": "acc_3",
+        "subscription_id": "plan_pro",
+        "email": "pending.invite@example.invalid",
+        "display_name": null,
+        "status": "invited",
+        "last_active_at": null
+      }
+    ],
+    "next_cursor": "page_2"
+  },
+  "page_2": {
+    "subscriptions": [],
+    "members": [
+      {
+        "id": "acc_4",
+        "subscription_id": "plan_storage",
+        "email": "second.owner@example.invalid",
+        "display_name": "Second Owner",
+        "status": "suspended",
+        "last_active_at": null
+      }
+    ],
+    "next_cursor": null
+  }
+}
