@@ -206,6 +206,10 @@ by a customer.
 Breaking changes to `@arkanaio/connector-contract` are announced here before they
 are applied, with the date and what has to change in an existing connector.
 
+- **0.1.1** — first version on public npm, and the first carrying its licence.
+  No change to the contract itself: install it with
+  `pnpm add @arkanaio/connector-contract`, with no token and no registry
+  configuration.
 - **0.1.0** — first published version, extracted from ALMA's `src/lib/connectors`
   so that both sides compile against the same definition. The contract stays
   below 1.0.0 while the first connectors of the initial catalogue are built.
