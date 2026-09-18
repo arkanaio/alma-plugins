@@ -13,7 +13,11 @@ on:
 
 permissions:
   contents: read
-  packages: write
+  # Lets npm record provenance: a signed attestation tying the published
+  # tarball to this repository, this workflow and this commit. Anyone
+  # installing a connector can then check that what they got was built here,
+  # which is the whole claim this repository makes.
+  id-token: write
 
 jobs:
   publish:
@@ -33,12 +37,17 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
-          registry-url: https://npm.pkg.github.com
-          scope: "@arkanaio"
+          # Public npm, not GitHub Packages. The contract is the interface
+          # anyone writing a connector compiles against, and GitHub Packages
+          # asks for a personal token even to read a public package: that is a
+          # barrier in front of the one package that must not have one.
+          registry-url: https://registry.npmjs.org
       - run: pnpm install --frozen-lockfile
       # Nothing is published that has not passed the same checks as a PR.
       - run: pnpm verify
       - name: Publish the package
-        run: pnpm --filter ${{ inputs.package }} publish --no-git-checks
+        run: >-
+          pnpm --filter ${{ inputs.package }} publish
+          --access public --provenance --no-git-checks
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
