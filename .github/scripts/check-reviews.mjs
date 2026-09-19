@@ -58,10 +58,45 @@ function fail(file, message) {
   problems.push(`${file}: ${message}`);
 }
 
+/**
+ * The lines of a file that are not inside an HTML comment.
+ *
+ * Scanned rather than stripped with a regular expression. The template explains
+ * itself in comments and shows an unchecked box inside one, and a review that
+ * keeps those comments is not a review with a box left unchecked.
+ */
+function linesOutsideComments(contents) {
+  const lines = [];
+  let inside = false;
+  for (const line of contents.split("\n")) {
+    let rest = line;
+    let outside = "";
+    while (rest.length > 0) {
+      if (inside) {
+        const end = rest.indexOf("-->");
+        if (end === -1) break;
+        inside = false;
+        rest = rest.slice(end + "-->".length);
+        continue;
+      }
+      const start = rest.indexOf("<!--");
+      if (start === -1) {
+        outside += rest;
+        break;
+      }
+      outside += rest.slice(0, start);
+      inside = true;
+      rest = rest.slice(start + "<!--".length);
+    }
+    lines.push(outside);
+  }
+  return lines;
+}
+
 /** The header is a list of `- **Key**: value` lines at the top of the file. */
 function readHeader(contents) {
   const header = new Map();
-  for (const line of contents.split("\n")) {
+  for (const line of linesOutsideComments(contents)) {
     const match = /^- \*\*([^*]+)\*\*:\s*(.*)$/.exec(line);
     if (match?.[1] !== undefined) header.set(match[1], (match[2] ?? "").trim());
   }
@@ -74,10 +109,6 @@ function items(value) {
     .split(",")
     .map((item) => item.trim())
     .filter((item) => item.length > 0);
-}
-
-function withoutComments(contents) {
-  return contents.replace(/<!--[\s\S]*?-->/g, "");
 }
 
 function checkReview(file, contents) {
@@ -173,11 +204,13 @@ function checkReview(file, contents) {
     }
   }
 
-  const unchecked = withoutComments(contents).match(/^\s*- \[ \]/gm);
-  if (unchecked !== null) {
+  const unchecked = linesOutsideComments(contents).filter((line) =>
+    /^\s*- \[ \]/.test(line),
+  ).length;
+  if (unchecked > 0) {
     fail(
       file,
-      `${unchecked.length} box${unchecked.length === 1 ? " is" : "es are"} unchecked. An unchecked box is a review that has not finished.`,
+      `${unchecked} box${unchecked === 1 ? " is" : "es are"} unchecked. An unchecked box is a review that has not finished.`,
     );
   }
 }
