@@ -21,9 +21,13 @@ database would not be, at any price.
    you want to synchronise. If it does not, this repository is not the path yet:
    that is the browser-automation phase, with different rules and a different
    support level.
-3. While [arkanaio/alma#366](https://github.com/arkanaio/alma/issues/366) is
-   open, the security review process can still change, and this repository does
-   not yet accept external connectors.
+3. This repository **does not yet accept connectors contributed from outside**.
+   The security review they go through is settled and written down
+   ([docs/SECURITY-REVIEW.md](docs/SECURITY-REVIEW.md)); what is not finished is
+   the repository around it, in
+   [arkanaio/alma#365](https://github.com/arkanaio/alma/issues/365), and the
+   contract stays below `1.0.0` while the first connectors of the initial
+   catalogue are built. Proposals, questions and fixes are welcome now.
 
 ## Language
 
@@ -184,22 +188,41 @@ the known limits: quotas, delays, fields the provider does not offer.
 1. Fork the repository and work on a branch.
 2. Sign off every commit with `git commit -s`. CI checks it, and a pull request
    without it is not reviewed. See [License and sign-off](#license-and-sign-off).
-3. Run `pnpm verify` before opening the PR. CI runs the same thing.
+3. Run `pnpm verify` before opening the PR. CI runs the same thing: build,
+   Biome, types, tests, and the check over the reviews on record.
 4. Fill in the template. The security section is read first.
 5. A PR that changes `contract/` or the repository configuration is reviewed
    separately from the connector that motivated it. Split them.
 
 ## How it is reviewed and published
 
-Automated tests, then a human security review with
-[docs/SECURITY-REVIEW.md](docs/SECURITY-REVIEW.md), then a published version.
-The review's PR is what ALMA's incorporation record cites as the evidence that
-the version was approved. See [docs/PUBLISHING.md](docs/PUBLISHING.md).
+Automated tests, then a human security review, then a published version. The
+process is [docs/SECURITY-REVIEW.md](docs/SECURITY-REVIEW.md) and the checklist
+someone fills in about your code is [reviews/TEMPLATE.md](reviews/TEMPLATE.md).
+Read it before you open the pull request: it is not a secret, and nothing in it
+is easier to fix after the fact.
+
+Three things about it are worth knowing in advance:
+
+- **A reviewer is never the author.** A connector contributed from outside is
+  read by **two** maintainers; one of arkana's own by one maintainer who did not
+  write it. Nobody's connector skips this, arkana's included.
+- **The review ends in a file**, `reviews/<package>-<version>.md`, merged into
+  `main`. That file is what ALMA's incorporation record cites, by a permalink
+  pinned to a commit, as the evidence that your version was approved. An
+  approval on a pull request is a state; this is a document that still answers
+  the question in three years.
+- **Every published version has its own review.** A version that only changes
+  code inside an already approved surface is reviewed against what changed.
+  Moving `capabilities`, `allowedHosts`, a permission asked of the customer, a
+  dependency or the `activity` declaration means the whole checklist again.
 
 The review may ask for changes that are not functional defects: fewer
 dependencies, narrower hosts, a field removed from an error. That is not
 distrust of the contributor; it is that the cost of getting this wrong is paid
-by a customer.
+by a customer who never saw the pull request.
+
+See [docs/PUBLISHING.md](docs/PUBLISHING.md) for what happens after.
 
 ## Contract changes
 

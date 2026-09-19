@@ -117,3 +117,6 @@ observability instead of the database.
 - [ ] The connector stamps no date of its own.
 - [ ] The value is not persisted, not cached and not logged.
 - [ ] There is a test with a seat that has no activity.
+- [ ] Nothing in the contribution builds a history of one person's activity:
+      not a response, not the sample data, not a test, not an error. One
+      current value per seat, and nothing kept between runs.

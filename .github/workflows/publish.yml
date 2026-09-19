@@ -45,6 +45,12 @@ jobs:
       - run: pnpm install --frozen-lockfile
       # Nothing is published that has not passed the same checks as a PR.
       - run: pnpm verify
+      # Nothing is published that has not passed its security review. The
+      # version in the package's package.json must have an accepted review in
+      # reviews/, signed by the people its support level requires. This is the
+      # gate; ALMA's incorporation record is the evidence afterwards. See
+      # docs/SECURITY-REVIEW.md.
+      - run: node .github/scripts/check-reviews.mjs --package "${{ inputs.package }}"
       # Provenance only on GitHub-hosted runners: npm rejects an attestation
       # built anywhere else, because an attestation is worth exactly as much as
       # the verifiability of the machine that made it. The organisation's own
