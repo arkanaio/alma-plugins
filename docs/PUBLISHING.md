@@ -14,8 +14,13 @@ ALMA's side of this is
 2. **Pull request** with the connector. CI runs with no network and no
    credentials.
 3. **Human security review**, with [SECURITY-REVIEW.md](SECURITY-REVIEW.md).
-   Mandatory, arkana's own connectors included.
-4. **A published version**: `@arkanaio/connector-<provider>@1.2.0`.
+   Mandatory, arkana's own connectors included. It ends in a file merged into
+   `main`, `reviews/<package>-<version>.md`, signed by two maintainers for a
+   connector contributed from outside and by one for arkana's own. That file is
+   what the record below cites.
+4. **A published version**: `@arkanaio/connector-<provider>@1.2.0`. The publish
+   workflow refuses a package whose exact version has no accepted review on
+   record, so step 4 cannot happen before step 3.
 5. **Incorporation into ALMA**, which is two steps and no third one:
    - `pnpm add @arkanaio/connector-<provider>@1.2.0`, exact, no range.
    - Write its entry in `connectors.lock.json` and add its definition to
@@ -34,6 +39,17 @@ the package manager already does.
 The record, `connectors.lock.json`, stores what no lockfile knows: **which
 review approved that version, who did it and when, and what surface was approved
 with it** — the capabilities and the hosts.
+
+`review.reference` is the permalink of the verdict file, pinned to a commit and
+never to a branch:
+
+```
+https://github.com/arkanaio/alma-plugins/blob/<commit>/reviews/connector-slack-1.0.0.md
+```
+
+Pinned, because the record has to keep showing what was signed on the day, not
+what the file says today. `review.reviewedBy` is the maintainer who wrote that
+file; a second signature, where one is required, is named inside it.
 
 From that comes the property that matters most: **raising the dependency without
 going through the record leaves the deployment unable to start.** The installed
@@ -69,9 +85,12 @@ Semantic, per connector:
 - **Minor**: new fields, a provider case that was not covered before.
 - **Patch**: fixes that do not change what is received.
 
-Changing `allowedHosts`, `capabilities` or `supportLevel` always needs a new
-review and a new record entry, whatever the version number says: those are the
-approved surface, and ALMA compares them on start-up.
+Every published version has its own review, because the record binds a review
+to a version: no version inherits another's. What changes is the depth. A
+version that only fixes code inside an already approved surface is reviewed
+against what changed; moving `allowedHosts`, `capabilities`, `supportLevel`, a
+permission asked of the customer, a dependency or the `activity` declaration
+means the whole checklist again, whatever the version number says.
 
 The **contract** package versions separately. A breaking change to it is
 announced in [CONTRIBUTING.md](../CONTRIBUTING.md) before it is applied.

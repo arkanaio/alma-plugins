@@ -20,10 +20,11 @@ Phase C of the
 progress. The contract is published at `0.1.0` and stays below `1.0.0` while the
 first connectors of the initial catalogue are built.
 
-This repository **does not yet accept external contributions of new connectors**:
-the security review process is still being settled in
-[arkanaio/alma#366](https://github.com/arkanaio/alma/issues/366). It does accept
-fixes, questions and provider proposals through an issue.
+This repository **does not yet accept external contributions of new
+connectors**. The security review they go through is settled and written down;
+what is not finished is the repository around it
+([arkanaio/alma#365](https://github.com/arkanaio/alma/issues/365)). It does
+accept fixes, questions and provider proposals through an issue.
 
 ## What is here
 
@@ -34,8 +35,9 @@ fixes, questions and provider proposals through an issue.
 | `docs/CONTRACT.md` | Orientation to the contract, and which half lives where. |
 | `docs/ACTIVITY.md` | The optional last-activity capability and its rules. |
 | `docs/SAMPLE-DATA.md` | How a connector is tested without reaching a real provider. |
-| `docs/SECURITY-REVIEW.md` | The checklist every contribution goes through. |
+| `docs/SECURITY-REVIEW.md` | The security review every version goes through: who does it, and when it is passed. |
 | `docs/PUBLISHING.md` | How a version reaches a deployment. |
+| `reviews/` | One file per reviewed version, and the checklist it was signed against. |
 
 The contract is **defined** in ALMA's
 [`docs/CONNECTORS.md`](https://github.com/arkanaio/alma/blob/main/docs/CONNECTORS.md)
@@ -48,7 +50,7 @@ You need Node 24 and pnpm 11.
 
 ```sh
 pnpm install
-pnpm verify   # build, Biome check, types and tests
+pnpm verify   # build, Biome check, types, tests and the reviews on record
 ```
 
 `pnpm verify` makes no network requests: every test runs against each

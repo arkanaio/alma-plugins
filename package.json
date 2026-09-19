@@ -15,7 +15,8 @@
     "check:write": "biome check --write .",
     "typecheck": "tsc --noEmit",
     "test": "node --test \"contract/tests/*.test.ts\" \"connectors/*/tests/*.test.ts\"",
-    "verify": "pnpm build && pnpm check && pnpm typecheck && pnpm test"
+    "review": "node .github/scripts/check-reviews.mjs",
+    "verify": "pnpm build && pnpm check && pnpm typecheck && pnpm test && pnpm review"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.7",

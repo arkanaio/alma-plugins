@@ -1,128 +1,175 @@
-# Security review of a contribution
+# Security review of a connector
 
-> **Provisional.** The final process is settled in
-> [arkanaio/alma#366](https://github.com/arkanaio/alma/issues/366). This
-> checklist is what applies in the meantime.
+No version of a connector is published without passing this review. **Not
+arkana's own either.** The process is settled in
+[arkanaio/alma#366](https://github.com/arkanaio/alma/issues/366).
 
-No contribution is published without passing this review. **Not arkana's own
-either.** The automated tests are a pre-filter, not a substitute: they check that
-the connector does what it says, not that it does nothing else.
+It carries weight for one reason. A connector reaches a deployment **installed
+as a package**, and ALMA's lint rule that keeps a connector away from the
+database only covers ALMA's own tree — it does not reach `node_modules`. What
+still stops a connector from reaching data is what always did: the execution
+context gives it nothing to reach with, and ALMA's internal alias does not even
+resolve from a published package. But the automatic check is no longer on that
+side, so this review is.
 
-The review is done by someone with write access, other than the contributor, and
-its result is written on the PR with this checklist filled in. That PR is what
-ALMA's incorporation record cites as `review.reference`, so it has to stay
-readable and stable: it is the evidence that a version was approved.
+This document owns the **process**: who reviews, what a review produces, when it
+is passed, and what forces a new one. The checks themselves are the checklist in
+[`reviews/TEMPLATE.md`](../reviews/TEMPLATE.md), which is also the file a review
+fills in. They are written once, there, so the list a reviewer signs cannot
+drift away from the list this repository documents.
 
-Once the package is installed in ALMA, the lint rule that keeps a connector away
-from the database no longer reaches it — it only covers ALMA's own tree. What
-still prevents it is that the context gives it nothing to reach with. But the
-automatic check has moved to this side, which is why this list exists.
+## What the automated checks settle, and what they do not
 
-## Before reading the code
+CI is a pre-filter, and it is worth knowing exactly what it buys:
 
-- [ ] An accepted proposal issue exists for this provider.
-- [ ] The PR brings **one connector** and does not touch `contract/`, another
-      connector, or the repository configuration. If it does, split it.
-- [ ] `defineConnector` accepts the manifest, and CI is green, the `dco` job
-      included: every commit is signed off by its author.
-- [ ] `supportLevel` is the right one: `community` for an external contribution.
-- [ ] `capabilities` is the minimum the connector actually implements. A
-      capability declared "for later" is approved surface nobody needed.
-- [ ] `allowedHosts` contains only machines the provider needs, and they belong
-      to the provider. A shortener, an analytics domain, a third-party CDN or a
-      personal domain is grounds for rejection.
-- [ ] `authentication` asks for the least the provider allows. For `oauth2`, each
-      scope is justified: read-only wherever the provider offers it.
-- [ ] The `configuration` fields ask for nothing the connector does not use.
-- [ ] The package name is scoped and the manifest `version` matches the version
-      to be published.
+| Check | What it proves |
+|---|---|
+| `pnpm build`, `pnpm tsc --noEmit` | The contract's types are respected. |
+| `pnpm biome ci .` | The code is formatted and free of the patterns Biome catches. |
+| `pnpm test` | The connector returns what it says it returns, against its own sample data, through the real host-restricted `fetch`. |
+| `dco` | Every commit carries a sign-off matching its author. |
+| `pnpm review` | Every accepted review on record is complete and signed. |
 
-## The boundary
+None of them proves the connector does **nothing else**. A connector that reads
+an environment variable, sends the credential in a query string, keeps an
+activity date between runs or pulls in a dependency published last week passes
+all of the above. That is the gap this review closes, and it closes it by
+someone reading the code.
 
-- [ ] Every outbound call goes through `context.fetch`. There is no global
-      `fetch`, no `node:http`, `node:https` or `node:net`, and no provider SDK
-      opening its own connections.
-- [ ] No import of `node:fs`, `node:child_process` or `node:worker_threads`.
-- [ ] No environment variables are read, and no files are written.
-- [ ] There is no `eval`, no `new Function`, no dynamic import with a computed
-      path, and no deserialisation of code.
-- [ ] The connector does not write to the provider: no POST, PUT, PATCH or
-      DELETE, unless the provider requires POST for a **query**, justified in the
-      PR.
-- [ ] Nothing in the code knows about an organisation, a tenant or a customer.
-- [ ] `context.now` is used instead of `Date.now()` or `new Date()` wherever a
-      date matters, so a test can pin it.
+## Who reviews
 
-## Credentials
+A reviewer is someone with write access to this repository, and **never the
+author of the contribution**. Two people, not one, when the code comes from
+outside arkana:
 
-- [ ] The credential is only ever sent to the declared hosts, and only in a
-      header — never in a URL, a query parameter or a body that gets logged.
-- [ ] The credential appears in no error, no returned value and no cursor.
-- [ ] No `ConnectorError` carries the provider's response in its code or
-      message. The body may only be in `cause`.
-- [ ] There is no credential, token or key anywhere in the repository, including
-      the sample data and the branch history.
+| Support level | Signatures |
+|---|---|
+| `community` — contributed from outside arkana | **Two** reviewers, neither of them the author. |
+| `official` — written by arkana | **One** reviewer, not the author. |
+| `browser_automation` | **Two** reviewers, neither of them the author. |
 
-## Data
+A contribution from outside gets two because the first review of an unfamiliar
+codebase is where the boundary is easiest to miss, and because a connector
+arrives with a customer's provider credential in front of it. Browser automation
+gets two for the same reason from the other direction: it is the support level
+where the connector does not go through a documented API at all.
 
-- [ ] Every provider response is validated before its contents are used.
-- [ ] No missing value is filled in with an assumption. An amount with no
-      currency is dropped whole.
-- [ ] The connector does not classify seats or decide whether an account is
-      orphaned.
-- [ ] Reads are paged, and the cursor is opaque: it carries a position, not
-      data, and not a credential.
-- [ ] Failures use the right kind: `credentials` for a rejected credential,
-      `permissions` for a missing scope, `service` for a temporary failure,
-      `contract` for a provider answer that does not match its own contract.
-- [ ] A rejected credential is not retried.
+arkana's own connectors are reviewed like any other, by someone who did not
+write them. A review nobody else reads is a review that checks nothing, and the
+deployment that runs the result is a customer's.
 
-## Last activity, if declared
+Both reviewers read the code. The second is not a rubber stamp on the first: the
+signatures mean two people looked, not that one looked and another agreed.
 
-Apply the full checklist in [ACTIVITY.md](ACTIVITY.md). In short:
+ALMA's record holds one account, `review.reviewedBy`. That is the reviewer who
+writes the verdict file; the second signs by approving the pull request that
+brings it, and both accounts are named in the file itself.
 
-- [ ] `measures` and `limitations` describe the provider's real field, and
-      `documentationUrl` points at the provider's page for it.
-- [ ] No sync date, assignment date or generic sign-in stands in for usage.
-- [ ] With no value, `lastActivityAt` is `null`.
-- [ ] The connector stamps no date of its own.
-- [ ] The value is not persisted, not cached and not logged.
+## What a review produces
 
-## Dependencies
+A file in [`reviews/`](../reviews/), copied from
+[`reviews/TEMPLATE.md`](../reviews/TEMPLATE.md) and named after the package and
+the version:
 
-Dependencies are allowed. They are also the part of a contribution that carries
-the most code nobody in this repository wrote, so they are read.
+```
+reviews/connector-slack-1.0.0.md
+```
 
-- [ ] Each new dependency is justified in the PR and there is no reasonable way
-      to avoid it.
-- [ ] No dependency runs install scripts.
-- [ ] No dependency has a name close to that of a well-known package.
-- [ ] Each one is a package with a real history, not a version published days
-      ago by an account with nothing else.
-- [ ] The dependency tree it drags in is proportionate to what it does.
-- [ ] `pnpm-lock.yaml` follows from the PR's `package.json` and brings no
-      unrelated changes.
+**The result is a file and not a conversation**, because of what ALMA does with
+it. Every incorporated connector carries in `connectors.lock.json` an HTTPS link
+to its review, the date it was done and the GitHub account that did it, and that
+link has to still answer the question years later: what exactly was approved,
+and who approved it. A pull request approval is a state, not a document. A
+comment can be edited afterwards with nothing visible left behind. A file merged
+into `main` and cited by a permalink pinned to a commit keeps saying today what
+it said the day it was signed, and it arrived the only way anything arrives
+here — through a pull request someone else read.
 
-## Sample data
+The record cites it pinned to a commit, never to a branch:
 
-- [ ] Anonymised: no email, name or identifier of a real person or customer.
-- [ ] No secrets.
-- [ ] Includes the awkward cases: a missing value, a suspended or invited
-      account, more than one page.
+```
+https://github.com/arkanaio/alma-plugins/blob/<commit>/reviews/connector-slack-1.0.0.md
+```
 
-## Documentation
+The file also fixes **the approved surface**: the `capabilities` and the
+`allowedHosts` copied from the manifest. Those are what goes into ALMA's record,
+and ALMA compares them against the installed manifest every time it starts. A
+connector that gains a host after being reviewed does not run, even with the
+same version number. Writing them into the verdict is therefore not bookkeeping:
+it is the list of what somebody actually agreed to.
 
-- [ ] The connector's `README.md` says what credential to create, with which
-      permissions, and which ones are **not** needed.
-- [ ] Known limits are documented: quotas, delays, fields the provider does not
-      offer.
+Only accepted reviews become files. A review that asks for changes or rejects a
+contribution stays on the pull request, because nothing was approved.
 
-## Outcome
+## When it is passed
 
-- **Accepted.** A version is published and it can be incorporated. The approved
-  surface — `capabilities` and `allowedHosts` — is stated in the review, because
-  that is what goes into ALMA's record.
-- **Changes requested.** With the list of points that do not pass.
-- **Rejected.** With the reason. A rejection over the connector boundary is not
+A version has passed its review when all of this is true:
+
+1. The verdict file is in `main`, with `Verdict: Accepted`.
+2. Every box in it is checked, and its header names the exact commit that was
+   read.
+3. It carries the signatures its support level requires, and none of them is
+   the author's.
+
+The file is usually the last commit on the connector's own pull request, written
+by the reviewer, so one merge brings the connector and the evidence that it was
+reviewed. When the contribution comes from a fork that maintainers cannot push
+to, the verdict goes in a pull request of its own straight after the merge, and
+nothing is published until it lands.
+
+Publishing enforces it. The publish workflow refuses to publish a package with
+no accepted review on record for the exact version in its `package.json`, and
+`pnpm review` runs the same check locally. Beyond that, ALMA will not start
+running a connector whose entry in `connectors.lock.json` nobody wrote, and
+writing that entry means filling in the link to this file.
+
+## What forces a new review
+
+**Every published version has its own verdict file.** The record binds a review
+to a version, so there is no such thing as a version that inherits the review of
+another.
+
+What changes is the depth, and it is honest to say so. A version that only fixes
+code inside an already approved surface is reviewed against what changed, and
+its file says which earlier review it builds on, in the notes. A version is
+reviewed from scratch, with the whole checklist read against the whole
+connector, when any of these moves:
+
+- `capabilities` or `allowedHosts` — the approved surface itself.
+- `supportLevel`, or the maintainer of the connector.
+- `authentication`: a new scope, a different credential, or a permission the
+  customer has to grant on top of what they already granted.
+- The dependencies: one added, one removed, or one whose own tree changed
+  shape.
+- The `activity` declaration, in either direction.
+
+A permission the customer has to grant deserves its own line because of how it
+usually arrives: the provider is **already connected** for something else, and
+the new capability looks like it comes for free. It does not. The checklist
+asks what each new permission buys, what happens when the customer says no, and
+that nothing switches itself on because the directory was already there.
+
+## Outcomes other than accepted
+
+- **Changes requested**, with the list of points that do not pass. The review
+  may ask for things that are not functional defects: fewer dependencies,
+  narrower hosts, a field removed from an error. That is not distrust of the
+  contributor. The cost of getting it wrong is paid by a customer who never saw
+  the pull request.
+- **Rejected**, with the reason. A rejection over the connector boundary is not
   negotiated case by case: if a connector needs something the contract does not
-  give, the conversation is about the contract, in an issue.
+  give, the conversation is about the contract, in an issue, and not about one
+  exception.
+
+Neither leaves a file in `reviews/`.
+
+## When something is found afterwards
+
+A verdict that has been cited is not edited. What was signed on the day stays
+readable as it was signed, which is the only reason a permalink is worth
+anything.
+
+A problem found after publication follows [SECURITY.md](../SECURITY.md) — not a
+public issue — and comes out the normal way: a fix, a review, a new version, and
+a new entry in ALMA's record. The affected versions are stated when the fix is
+published.

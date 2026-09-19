@@ -6,11 +6,23 @@
 
 ## Approved surface
 
-<!-- This is what goes into ALMA's incorporation record, so state it exactly. -->
+<!-- This is what the review approves and what goes, word for word, into ALMA's
+     incorporation record. ALMA compares it against the installed manifest every
+     time it starts, so state it exactly. -->
 
 - `capabilities`:
 - `allowedHosts`, and why each one is needed:
 - `authentication`, and the minimum permissions it asks the customer for:
+
+### Permissions the customer has to grant on top of what they already granted
+
+<!-- Only if ALMA already talks to this provider for something else. If it does
+     not, write "Nothing granted for this provider yet" and move on. -->
+
+- Each new permission, and which capability it buys:
+- What happens if the customer does not grant it:
+- I confirm this capability does not switch itself on because the provider is
+  already connected: <!-- yes / no -->
 
 ## Security
 
@@ -40,6 +52,8 @@
 - I confirm that with no value `lastActivityAt` is `null`, that the connector
   stamps no date of its own, and that the value is neither stored nor
   logged: <!-- yes / no -->
+- I confirm nothing here builds a history of one person's activity — not a
+  response, not the sample data, not a test, not an error: <!-- yes / no -->
 
 ## Validation performed
 

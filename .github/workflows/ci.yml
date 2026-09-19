@@ -49,6 +49,10 @@ jobs:
       # Tests run against each connector's sample data. This job holds no
       # provider credential, and it must not hold one.
       - run: pnpm test
+      # Every accepted review on record is complete and signed. It catches the
+      # verdict that names one reviewer for a community connector, or leaves a
+      # box unchecked, while the pull request that brings it is still open.
+      - run: pnpm review
 
   # Every commit in a pull request certifies its origin with a Signed-off-by
   # trailer (DCO 1.1). There is no CLA: Apache 2.0 section 5 already places a

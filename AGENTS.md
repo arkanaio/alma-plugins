@@ -69,6 +69,11 @@ reaches it. What still holds is that the context gives it nothing — and the
 security review. That is why `docs/SECURITY-REVIEW.md` is load-bearing and not
 paperwork.
 
+The checks a review makes live once, in `reviews/TEMPLATE.md`, which is also the
+file a review fills in. `docs/SECURITY-REVIEW.md` owns the process around it and
+does not restate the list. Never copy the checklist into a second document: two
+copies of one list is the same failure as two documents describing one contract.
+
 ## Tests never reach a real provider
 
 Every test runs against the connector's own sample data, through the real
@@ -79,13 +84,15 @@ one. Never commit a credential, a token, or real people's data.
 
 ## Publishing
 
-Publishing is manual, by workflow dispatch, and only after a review. A package
-name is always scoped `@arkanaio/...`: an unscoped name is what lets a typo
-install somebody else's package, and ALMA's incorporation record rejects it.
+Publishing is manual, by workflow dispatch, and only after a review. A review
+ends in a file in `reviews/`, and the workflow refuses to publish a version that
+has none. A package name is always scoped `@arkanaio/...`: an unscoped name is
+what lets a typo install somebody else's package, and ALMA's incorporation
+record rejects it.
 
 ## Before handing off
 
-Run `pnpm verify` (build, Biome, types and tests). Check that a contributor
+Run `pnpm verify` (build, Biome, types, tests and the reviews on record). Check that a contributor
 following `CONTRIBUTING.md` after your change would not be wrong, stuck, or
 unaware of something they can now do; if they would, update the guide in the
 same PR.
