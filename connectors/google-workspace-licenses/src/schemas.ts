@@ -1,6 +1,8 @@
 import { z } from "zod";
 
 export const configurationSchema = z.object({
+  read_mode: z.enum(["assignments", "purchased"]).default("assignments"),
+  report_date: z.iso.date().optional(),
   customer_id: z.string().regex(/^C[a-zA-Z0-9]{3,99}$/),
 });
 

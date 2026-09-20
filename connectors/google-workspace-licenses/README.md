@@ -1,7 +1,8 @@
 # Google Workspace licenses
 
 Reads the Google Workspace edition assigned to each account using Enterprise
-License Manager API, product `Google-Apps`. This is a separate connector from
+License Manager API, product `Google-Apps`, and purchased-license totals from
+Customer Usage Reports where Google exposes them. This is a separate connector from
 the directory. Enabling the directory never enables license collection.
 
 ## Authorization
@@ -20,7 +21,11 @@ editing the delegation. Enable Enterprise License Manager API in the host's
 Google Cloud project. Set `customer_id` to the organization's Google customer ID
 from Account settings, Profile; `my_customer` is not accepted.
 
-No Directory, Reports, billing or Reseller API permission is requested here.
+Purchased mode requires `https://www.googleapis.com/auth/admin.reports.usage.readonly`
+and a delegated administrator with Reports access. Enable Admin SDK API in the
+host project. The host passes a separately scoped token for each read mode, so a
+Reports failure does not prevent assignment reads. No Directory, billing or
+Reseller API permission is requested by the package.
 Refusing the extra scope fails license collection with `permissions`; directory
 sync remains independent. The host must require explicit activation and verify
 that the customer ID belongs to the authenticated organization's directory.
@@ -31,10 +36,23 @@ that the customer ID belongs to the authenticated organization's directory.
   remain readable; no hard-coded SKU catalogue can silently omit them.
 - All pages must finish before the host reconciles absences. Page size is 100;
   the opaque Google page token is returned as the continuation cursor.
-- Prices, currencies, billing cycles and purchased seat counts are unknown
-  and returned as null. Assigned accounts are not purchased seat totals.
+- Prices, currencies and billing cycles remain null. Assignment mode returns
+  null seat counts: assigned accounts are not purchased seat totals.
+- Purchased mode returns documented totals for G Suite Basic (deduplicating
+  its two metric aliases), G Suite Business, Enterprise Plus and Google Vault.
+  Missing metrics remain unknown. These are partial coverage, never a guaranteed
+  subscription total. Business Starter/Standard/Plus have no documented total
+  in this endpoint; their assignment counts must not substitute for purchases.
+- Set `read_mode` to `purchased` and `report_date` to a YYYY-MM-DD date in Google's
+  fixed UTC-8 reporting timezone. The host tries recent dates and retains the
+  latest complete report per edition, displaying its date. Pagination is opaque;
+  reports with warnings are rejected as `report_not_available` so the host may
+  try an older date. Customer/date mismatches and conflicting counts fail closed.
+- Purchased mode returns no accounts and only requests license-total metrics,
+  never user-activity metrics. It also covers totals without assigned accounts;
+  Vault assignments remain outside assignment-mode coverage.
 - Activity is not declared or collected. No last-sign-in is substituted for use.
-- Only `Google-Apps` is read: separate-product add-ons, archived-user licenses,
+- Assignment mode only reads `Google-Apps`: separate-product add-ons, archived-user licenses,
   device licenses and domain-wide SKUs are outside this version's coverage.
 - `userId` is the account's current primary email, not a stable Directory ID.
   A rename appears as an absent old account and a newly detected one. The host
@@ -44,7 +62,9 @@ that the customer ID belongs to the authenticated organization's directory.
 
 References: [assignments](https://developers.google.com/workspace/admin/licensing/reference/rest/v1/licenseAssignments),
 [listing and scope](https://developers.google.com/workspace/admin/licensing/reference/rest/v1/licenseAssignments/listForProduct),
-[supported products](https://developers.google.com/workspace/admin/licensing/v1/how-tos/products).
+[supported products](https://developers.google.com/workspace/admin/licensing/v1/how-tos/products),
+[Reports totals](https://developers.google.com/workspace/admin/reports/v1/appendix/usage/customer/accounts),
+[Reports request](https://developers.google.com/workspace/admin/reports/reference/rest/v1/customerUsageReports/get).
 
 ## Verification and release
 

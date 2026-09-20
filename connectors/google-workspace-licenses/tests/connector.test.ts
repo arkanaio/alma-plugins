@@ -6,16 +6,22 @@ import {
   createConnectorFetch,
 } from "@arkanaio/connector-contract";
 import assignments from "../sample-data/assignments.json" with { type: "json" };
+import purchased from "../sample-data/purchased.json" with { type: "json" };
 import { googleWorkspaceLicensesConnector } from "../src/index.ts";
 
 const definition = googleWorkspaceLicensesConnector;
-async function read(body: unknown, status = 200, cursor: string | null = null) {
+async function read(
+  body: unknown,
+  status = 200,
+  cursor: string | null = null,
+  configuration: Record<string, string> = {},
+) {
   const requests: { url: string; init: RequestInit }[] = [];
   const reader = definition.readers.licenses;
   assert.ok(reader);
   const page = await reader({
     context: {
-      configuration: { customer_id: "C01234567" },
+      configuration: { customer_id: "C01234567", ...configuration },
       secrets: { access_token: "sample-token-never-real" },
       now: () => new Date("2026-09-20T12:00:00Z"),
       fetch: createConnectorFetch({
@@ -147,3 +153,116 @@ test("the declared boundary refuses another host before sending credentials", as
   );
   assert.equal(sent, false);
 });
+
+const reportConfiguration = {
+  read_mode: "purchased",
+  report_date: "2026-09-18",
+};
+const report = (body: unknown, status = 200, cursor: string | null = null) =>
+  read(body, status, cursor, reportConfiguration);
+
+test("reads purchased totals, deduplicates aliases and preserves explicit zero", async () => {
+  const { page, requests } = await report(purchased);
+  assert.deepEqual(
+    page.plans.map((plan) => [plan.externalId, plan.seatCount]),
+    [
+      ["Google-Apps/Google-Apps-For-Business", 10],
+      ["Google-Apps/1010020020", 30],
+      ["Google-Vault/Google-Vault", 0],
+    ],
+  );
+  assert.deepEqual(page.seats, []);
+  assert.ok(
+    !page.plans.some((plan) => plan.externalId === "Google-Apps/1010020028"),
+  );
+  const url = new URL(requests[0]?.url ?? "");
+  assert.equal(url.hostname, "admin.googleapis.com");
+  assert.equal(url.pathname, "/admin/reports/v1/usage/dates/2026-09-18");
+  assert.equal(url.searchParams.get("customerId"), "C01234567");
+  assert.equal(
+    url.searchParams.get("parameters"),
+    "accounts:gsuite_basic_total_licenses,accounts:apps_total_licenses,accounts:gsuite_unlimited_total_licenses,accounts:gsuite_enterprise_total_licenses,accounts:vault_total_licenses",
+  );
+  assert.equal(requests[0]?.init.method, "GET");
+});
+
+test("reports are paginated and missing totals remain unknown", async () => {
+  const { page, requests } = await report(
+    { ...purchased, nextPageToken: "next" },
+    200,
+    "previous",
+  );
+  assert.equal(page.cursor, "next");
+  assert.equal(
+    new URL(requests[0]?.url ?? "").searchParams.get("pageToken"),
+    "previous",
+  );
+  assert.deepEqual((await report({ kind: purchased.kind })).page, {
+    plans: [],
+    seats: [],
+    cursor: null,
+  });
+});
+
+test("rejects another customer, another date and invalid or contradictory counts", async () => {
+  const original = purchased.usageReports[0];
+  assert.ok(original);
+  for (const entry of [
+    { ...original, entity: { customerId: "COTHER", type: "CUSTOMER" } },
+    { ...original, date: "2026-09-17" },
+    ...["-1", "1.5", "1000001", "9007199254740993", undefined].map(
+      (intValue) => ({
+        ...original,
+        parameters: [{ name: "accounts:vault_total_licenses", intValue }],
+      }),
+    ),
+    {
+      ...original,
+      parameters: [
+        { name: "accounts:apps_total_licenses", intValue: "20" },
+        { name: "accounts:gsuite_basic_total_licenses", intValue: "10" },
+      ],
+    },
+  ])
+    await assert.rejects(
+      report({ kind: purchased.kind, usageReports: [entry] }),
+      { kind: "contract" },
+    );
+});
+
+test("incomplete reports never become authoritative totals", async () => {
+  await assert.rejects(
+    report({ ...purchased, warnings: [{ code: "PARTIAL_DATA_AVAILABLE" }] }),
+    { code: "report_not_available" },
+  );
+  await assert.rejects(read(purchased, 200, null, { read_mode: "purchased" }), {
+    code: "missing_report_date",
+  });
+  await assert.rejects(
+    read(purchased, 200, null, {
+      read_mode: "purchased",
+      report_date: "2026-02-31",
+    }),
+    { code: "invalid_configuration" },
+  );
+});
+
+for (const [status, kind] of [
+  [401, "credentials"],
+  [403, "permissions"],
+  [429, "service"],
+  [500, "service"],
+  [404, "contract"],
+] as const) {
+  test(`Reports HTTP ${status} remains isolated and sanitized`, async () => {
+    await assert.rejects(
+      report({ secret: "private-provider-body" }, status),
+      (error: unknown) => {
+        assert.ok(error instanceof ConnectorError);
+        assert.equal(error.kind, kind);
+        assert.ok(!String(error).includes("private-provider-body"));
+        return true;
+      },
+    );
+  });
+}

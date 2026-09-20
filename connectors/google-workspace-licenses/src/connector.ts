@@ -4,6 +4,7 @@ import {
   defineConnector,
 } from "@arkanaio/connector-contract";
 import { manifest } from "./manifest.ts";
+import { readPurchasedLicenses } from "./reports.ts";
 import { assignmentListSchema, configurationSchema } from "./schemas.ts";
 
 export const googleWorkspaceLicensesConnector: ConnectorDefinition =
@@ -19,6 +20,18 @@ export const googleWorkspaceLicensesConnector: ConnectorDefinition =
         const token = context.secrets.access_token;
         if (!token || /[\r\n]/.test(token))
           throw new ConnectorError("credentials", "invalid_secret");
+        if (configuration.data.read_mode === "purchased") {
+          if (!configuration.data.report_date)
+            throw new ConnectorError("contract", "missing_report_date");
+          return readPurchasedLicenses(
+            context,
+            {
+              customer_id: configuration.data.customer_id,
+              report_date: configuration.data.report_date,
+            },
+            cursor,
+          );
+        }
         const url = new URL(
           "https://licensing.googleapis.com/apps/licensing/v1/product/Google-Apps/users",
         );
