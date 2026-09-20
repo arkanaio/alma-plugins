@@ -31,6 +31,7 @@ export const googleWorkspaceLicensesConnector: ConnectorDefinition =
             authorization: `Bearer ${token}`,
           },
           method: "GET",
+          signal: AbortSignal.timeout(15000),
         });
         if (response.status === 401)
           throw new ConnectorError("credentials", "rejected");
