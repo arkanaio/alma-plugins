@@ -1,0 +1,18 @@
+{
+  "kind": "licensing#licenseAssignmentList",
+  "nextPageToken": "sample-page-2",
+  "items": [
+    {
+      "productId": "Google-Apps",
+      "skuId": "1010020028",
+      "skuName": "Google Workspace Business Standard",
+      "userId": "alex@example.invalid"
+    },
+    {
+      "productId": "Google-Apps",
+      "skuId": "1010020025",
+      "skuName": "Google Workspace Business Plus",
+      "userId": "sam@example.invalid"
+    }
+  ]
+}
