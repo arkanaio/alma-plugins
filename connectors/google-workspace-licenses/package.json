@@ -1,0 +1,24 @@
+{
+  "name": "@arkanaio/connector-google-workspace-licenses",
+  "version": "0.1.0",
+  "description": "Google Workspace license editions and assignments for ALMA.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "prepack": "pnpm build"
+  },
+  "dependencies": {
+    "@arkanaio/connector-contract": "0.1.1",
+    "zod": "4.4.3"
+  }
+}

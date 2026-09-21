@@ -27,6 +27,15 @@ importers:
         specifier: ^4.1.13
         version: 4.1.13
 
+  connectors/google-workspace-licenses:
+    dependencies:
+      '@arkanaio/connector-contract':
+        specifier: 0.1.1
+        version: 0.1.1
+      zod:
+        specifier: 4.4.3
+        version: 4.4.3
+
   contract:
     dependencies:
       zod:
@@ -34,6 +43,10 @@ importers:
         version: 4.1.13
 
 packages:
+
+  '@arkanaio/connector-contract@0.1.1':
+    resolution: {integrity: sha512-BGkeHrFU8+e6vJdiFE5HS7RpDWuwIwmz2GV4zRmDQ5S5EAfvTS7Qydj9aqkPoCyHCmuqSGkyaUMnkcvUK0bBDg==}
+    engines: {node: '>=24'}
 
   '@biomejs/biome@2.5.7':
     resolution: {integrity: sha512-zr8K/DcY5tYsQOQwqMJ0AWElo6QgmgNI7idXgXLhevVszlt8RGVpesEJPqx3ThazLaOwjJ5Y8fz3BtH5fGZNsw==}
@@ -106,7 +119,14 @@ packages:
   zod@4.1.13:
     resolution: {integrity: sha512-AvvthqfqrAhNH9dnfmrfKzX5upOdjUVJYFqNSlkmGf64gRaTzlPwz99IHYnVs28qYAybvAlBV+H7pn0saFY4Ig==}
 
+  zod@4.4.3:
+    resolution: {integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==}
+
 snapshots:
+
+  '@arkanaio/connector-contract@0.1.1':
+    dependencies:
+      zod: 4.1.13
 
   '@biomejs/biome@2.5.7':
     optionalDependencies:
@@ -152,3 +172,5 @@ snapshots:
   undici-types@7.16.0: {}
 
   zod@4.1.13: {}
+
+  zod@4.4.3: {}

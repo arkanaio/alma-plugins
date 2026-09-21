@@ -1,0 +1,18 @@
+{
+  "kind": "admin#reports#usageReports",
+  "usageReports": [
+    {
+      "date": "2026-09-18",
+      "entity": { "customerId": "C01234567", "type": "CUSTOMER" },
+      "parameters": [
+        { "name": "accounts:gsuite_basic_total_licenses", "intValue": "10" },
+        { "name": "accounts:apps_total_licenses", "intValue": "10" },
+        {
+          "name": "accounts:gsuite_enterprise_total_licenses",
+          "intValue": "30"
+        },
+        { "name": "accounts:vault_total_licenses", "intValue": "0" }
+      ]
+    }
+  ]
+}
