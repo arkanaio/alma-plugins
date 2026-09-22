@@ -14,7 +14,7 @@ async function read(
   body: unknown,
   status = 200,
   cursor: string | null = null,
-  configuration: Record<string, string> = {},
+  configuration: Record<string, string | null> = {},
 ) {
   const requests: { url: string; init: RequestInit }[] = [];
   const reader = definition.readers.licenses;
@@ -79,6 +79,21 @@ test("passes the opaque cursor and accepts a genuinely empty final page", async 
   assert.equal(
     new URL(request.url).searchParams.get("pageToken"),
     "next/page?=",
+  );
+});
+
+test("absent optional fields arrive as null, as the contract delivers them", async () => {
+  // The host hands over every declared key with null for the ones the
+  // organisation left empty; a connector that only accepts undefined fails
+  // its first real read.
+  const { page } = await read(assignments, 200, null, {
+    read_mode: null,
+    report_date: null,
+  });
+  assert.equal(page.seats.length, 2);
+  await assert.rejects(
+    read(purchased, 200, null, { read_mode: "purchased", report_date: null }),
+    { code: "missing_report_date" },
   );
 });
 
