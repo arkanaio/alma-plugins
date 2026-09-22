@@ -262,6 +262,20 @@ test("incomplete reports never become authoritative totals", async () => {
   );
 });
 
+test("a pending report date lets the host try an older date", async () => {
+  const message = "Data for dates later than 2026-09-18 is not yet available";
+  for (const error of [{ message }, { errors: [{ message }] }]) {
+    await assert.rejects(report({ error }, 400), {
+      kind: "contract",
+      code: "report_not_available",
+    });
+  }
+  await assert.rejects(
+    report({ error: { message: "Invalid customer ID" } }, 400),
+    { kind: "contract", code: "unexpected_status" },
+  );
+});
+
 for (const [status, kind] of [
   [401, "credentials"],
   [403, "permissions"],

@@ -62,6 +62,13 @@ const responseSchema = z.object({
     .default([]),
 });
 
+const errorBodySchema = z.object({
+  error: z.object({
+    message: z.string().optional(),
+    errors: z.array(z.object({ message: z.string() })).default([]),
+  }),
+});
+
 export async function readPurchasedLicenses(
   context: ConnectorContext,
   configuration: { customer_id: string; report_date: string },
@@ -87,6 +94,25 @@ export async function readPurchasedLicenses(
     throw new ConnectorError("permissions", "reports_scope_missing");
   if (response.status === 429 || response.status >= 500)
     throw new ConnectorError("service", "provider_unavailable");
+  if (response.status === 400) {
+    // A date with no usage report yet can answer 400. The host then tries
+    // older dates, while unrelated 400 responses remain contract failures.
+    const errorBody = errorBodySchema.safeParse(
+      await response.json().catch(() => null),
+    );
+    const pending = errorBody.success
+      ? [
+          errorBody.data.error.message,
+          ...errorBody.data.error.errors.map((entry) => entry.message),
+        ].some(
+          (message) =>
+            message?.startsWith("Data for dates later than ") &&
+            message.includes(" is not yet available"),
+        )
+      : false;
+    if (pending) throw new ConnectorError("contract", "report_not_available");
+    throw new ConnectorError("contract", "unexpected_status");
+  }
   if (!response.ok) throw new ConnectorError("contract", "unexpected_status");
   const body = responseSchema.safeParse(
     await response.json().catch(() => null),
