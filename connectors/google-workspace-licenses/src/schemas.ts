@@ -1,8 +1,12 @@
 import { z } from "zod";
 
+// The contract delivers absent optional fields as null, never as a missing key.
 export const configurationSchema = z.object({
-  read_mode: z.enum(["assignments", "purchased"]).default("assignments"),
-  report_date: z.iso.date().optional(),
+  read_mode: z
+    .enum(["assignments", "purchased"])
+    .nullish()
+    .transform((value) => value ?? "assignments"),
+  report_date: z.iso.date().nullish(),
   customer_id: z.string().regex(/^C[a-zA-Z0-9]{3,99}$/),
 });
 
