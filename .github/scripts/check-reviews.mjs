@@ -12,7 +12,8 @@
 // Run with no arguments, it checks every review on record (`pnpm review`, and
 // CI). Run with `--package @arkanaio/connector-slack`, it also demands an
 // accepted review for the exact version in that package's package.json, which
-// is what the publish workflow asks before publishing anything.
+// is what the publish workflow asks before publishing anything. A version below
+// 1.0.0 is let through without one; see "Before 1.0.0" in the process.
 //
 // See docs/SECURITY-REVIEW.md.
 
@@ -250,6 +251,15 @@ function checkPackage(name) {
   if (!VERSION.test(version)) {
     problems.push(
       `${name}: its version, ${version}, is not a semantic version.`,
+    );
+    return;
+  }
+  // Below 1.0.0 a version publishes on merge without a review on record. The
+  // exception expires by itself: the first 1.0.0 of a package is held to the
+  // whole process. See docs/SECURITY-REVIEW.md, "Before 1.0.0".
+  if (version.startsWith("0.")) {
+    console.error(
+      `${name}@${version} is below 1.0.0 and publishes without a review on record.`,
     );
     return;
   }

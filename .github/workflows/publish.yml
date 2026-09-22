@@ -1,15 +1,22 @@
 name: Publish
 
-# Publishing is deliberately manual. A connector reaches ALMA because someone
-# reviewed it and wrote its incorporation record, so the version that leaves
-# this repository is a decision, never the side effect of a merge.
+# Until 1.0.0, every merge to main publishes. A pull request that bumps a
+# package's version publishes it when it lands; one that does not publishes
+# nothing, because there is nothing new to publish. The security review is
+# demanded from 1.0.0 on, by check-reviews.mjs, so the relaxation expires by
+# itself with the first 1.0.0 of each package. See docs/SECURITY-REVIEW.md,
+# "Before 1.0.0".
+#
+# The manual dispatch publishes the same set, for retrying a run that failed.
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
-    inputs:
-      package:
-        description: The workspace package to publish.
-        required: true
-        type: string
+
+# Two merges in a row must not race to publish the same version.
+concurrency:
+  group: publish
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -45,22 +52,43 @@ jobs:
       - run: pnpm install --frozen-lockfile
       # Nothing is published that has not passed the same checks as a PR.
       - run: pnpm verify
-      # Nothing is published that has not passed its security review. The
-      # version in the package's package.json must have an accepted review in
-      # reviews/, signed by the people its support level requires. This is the
-      # gate; ALMA's incorporation record is the evidence afterwards. See
-      # docs/SECURITY-REVIEW.md.
-      - run: node .github/scripts/check-reviews.mjs --package "${{ inputs.package }}"
+      - name: Find the versions not on npm yet
+        id: pending
+        run: |
+          packages="$(node .github/scripts/unpublished-packages.mjs)"
+          echo "Pending: ${packages:-nothing}"
+          {
+            echo "packages<<EOF"
+            echo "$packages"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+      # From 1.0.0 on, nothing is published that has not passed its security
+      # review: the version in the package's package.json must have an accepted
+      # review in reviews/, signed by the people its support level requires.
+      # Below 1.0.0 the script lets it through. See docs/SECURITY-REVIEW.md.
+      - name: Check the reviews
+        if: steps.pending.outputs.packages != ''
+        env:
+          PACKAGES: ${{ steps.pending.outputs.packages }}
+        run: |
+          while read -r package; do
+            node .github/scripts/check-reviews.mjs --package "$package"
+          done <<< "$PACKAGES"
       # Provenance only on GitHub-hosted runners: npm rejects an attestation
       # built anywhere else, because an attestation is worth exactly as much as
-      # the verifiability of the machine that made it. The organisation's own
-      # runners are used while this repository is private and its Actions
-      # billing is blocked; the day CI_RUNS_ON switches to ubuntu-latest for
-      # going public, provenance turns on by itself.
-      - name: Publish the package
-        run: >-
-          pnpm --filter ${{ inputs.package }} publish
-          --access public --no-git-checks
-          ${{ runner.environment == 'github-hosted' && '--provenance' || '' }}
+      # the verifiability of the machine that made it.
+      #
+      # pnpm publishes the filtered packages in dependency order, so a contract
+      # raised in the same merge as the connector that needs it goes first.
+      - name: Publish the packages
+        if: steps.pending.outputs.packages != ''
         env:
+          PACKAGES: ${{ steps.pending.outputs.packages }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          PROVENANCE: ${{ runner.environment == 'github-hosted' && '--provenance' || '' }}
+        run: |
+          filters=()
+          while read -r package; do
+            filters+=(--filter "$package")
+          done <<< "$PACKAGES"
+          pnpm -r "${filters[@]}" publish --access public --no-git-checks $PROVENANCE

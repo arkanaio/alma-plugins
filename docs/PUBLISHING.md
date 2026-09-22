@@ -14,13 +14,18 @@ ALMA's side of this is
 2. **Pull request** with the connector. CI runs with no network and no
    credentials.
 3. **Human security review**, with [SECURITY-REVIEW.md](SECURITY-REVIEW.md).
-   Mandatory, arkana's own connectors included. It ends in a file merged into
+   Mandatory from `1.0.0` on, arkana's own connectors included; below `1.0.0`
+   it is waived for now (see
+   [Before 1.0.0](SECURITY-REVIEW.md#before-100)). It ends in a file merged into
    `main`, `reviews/<package>-<version>.md`, signed by two maintainers for a
    connector contributed from outside and by one for arkana's own. That file is
    what the record below cites.
-4. **A published version**: `@arkanaio/connector-<provider>@1.2.0`. The publish
-   workflow refuses a package whose exact version has no accepted review on
-   record, so step 4 cannot happen before step 3.
+4. **A published version**: `@arkanaio/connector-<provider>@1.2.0`. Merging to
+   `main` publishes every package whose version is not on npm yet, so releasing
+   means bumping the version in the pull request; a merge that bumps nothing
+   publishes nothing. From `1.0.0` on, the publish workflow refuses a package
+   whose exact version has no accepted review on record, so step 4 cannot
+   happen before step 3.
 5. **Incorporation into ALMA**, which is two steps and no third one:
    - `pnpm add @arkanaio/connector-<provider>@1.2.0`, exact, no range.
    - Write its entry in `connectors.lock.json` and add its definition to
