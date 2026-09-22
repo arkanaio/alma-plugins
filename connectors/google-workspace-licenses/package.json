@@ -1,9 +1,14 @@
 {
   "name": "@arkanaio/connector-google-workspace-licenses",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Google Workspace license editions and assignments for ALMA.",
   "license": "Apache-2.0",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arkanaio/alma-plugins.git",
+    "directory": "connectors/google-workspace-licenses"
+  },
   "exports": {
     ".": "./dist/index.js"
   },
