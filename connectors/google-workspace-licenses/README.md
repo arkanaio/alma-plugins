@@ -71,5 +71,5 @@ References: [assignments](https://developers.google.com/workspace/admin/licensin
 Sample responses are synthetic and contain no customer data. Tests exercise the
 real host boundary with an in-memory transport and never contact Google.
 Build with `pnpm --filter @arkanaio/connector-google-workspace-licenses build`.
-Run `pnpm verify` before review. Version 0.1.0 requires its own human security
+Run `pnpm verify` before review. Version 0.1.1 requires its own human security
 review and publication before it can be incorporated into ALMA.
