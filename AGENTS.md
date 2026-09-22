@@ -84,9 +84,15 @@ one. Never commit a credential, a token, or real people's data.
 
 ## Publishing
 
-Publishing is manual, by workflow dispatch, and only after a review. A review
-ends in a file in `reviews/`, and the workflow refuses to publish a version that
-has none. A package name is always scoped `@arkanaio/...`: an unscoped name is
+Every merge to `main` publishes each package whose version is not on npm yet,
+so a pull request that should release something bumps the version in its
+`package.json` (and in the manifest, for a connector). From `1.0.0` on, a
+version publishes only after a review: a review ends in a file in `reviews/`,
+and the workflow refuses to publish a version that has none. Below `1.0.0` that
+check is waived until
+[arkanaio/alma#553](https://github.com/arkanaio/alma/issues/553); see "Before
+1.0.0" in `docs/SECURITY-REVIEW.md`. Do not widen the waiver to `1.0.0` or
+above. A package name is always scoped `@arkanaio/...`: an unscoped name is
 what lets a typo install somebody else's package, and ALMA's incorporation
 record rejects it.
 

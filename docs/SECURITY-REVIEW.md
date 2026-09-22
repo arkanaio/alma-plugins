@@ -1,7 +1,8 @@
 # Security review of a connector
 
-No version of a connector is published without passing this review. **Not
-arkana's own either.** The process is settled in
+From `1.0.0` on, no version of a connector is published without passing this
+review. **Not arkana's own either.** Below `1.0.0` there is a temporary
+exception, in [Before 1.0.0](#before-100). The process is settled in
 [arkanaio/alma#366](https://github.com/arkanaio/alma/issues/366).
 
 It carries weight for one reason. A connector reaches a deployment **installed
@@ -17,6 +18,37 @@ is passed, and what forces a new one. The checks themselves are the checklist in
 [`reviews/TEMPLATE.md`](../reviews/TEMPLATE.md), which is also the file a review
 fills in. They are written once, there, so the list a reviewer signs cannot
 drift away from the list this repository documents.
+
+## Before 1.0.0
+
+**Until a package reaches `1.0.0`, it publishes without this review.** The
+first connectors of the initial catalogue are being built, the contract is
+still moving, and reviewing every 0.x version was slowing that work down more
+than it protected anyone: this repository does not accept connectors from
+outside yet, so every 0.x version is arkana's own code. The decision is recorded
+in [arkanaio/alma#366](https://github.com/arkanaio/alma/issues/366).
+
+What still holds for a 0.x version:
+
+- It arrives through a pull request, and CI (`pnpm verify` and `dco`) passes
+  before it merges.
+- The connector boundary in [CONTRIBUTING.md](../CONTRIBUTING.md) is the same.
+  Nothing in it is relaxed.
+- A review, when someone writes one, still goes in `reviews/` and `pnpm review`
+  still checks it.
+
+What changes: every merge to `main` publishes the versions not yet on npm
+([PUBLISHING.md](PUBLISHING.md)), and the publish workflow does not ask for a
+file in `reviews/` for a version below `1.0.0`. ALMA's record cites the merged
+pull request instead of a verdict file.
+
+The exception expires by itself. `check-reviews.mjs` demands an accepted review
+for any version from `1.0.0` on, so no package reaches `1.0.0` without passing
+the whole process below. Restoring the rest of the enforcement (branch
+protection, a protected publish environment, reviews for the connectors ALMA
+already runs) is tracked in
+[arkanaio/alma#553](https://github.com/arkanaio/alma/issues/553), and is done
+before this repository accepts connectors from outside.
 
 ## What the automated checks settle, and what they do not
 
@@ -117,9 +149,9 @@ reviewed. When the contribution comes from a fork that maintainers cannot push
 to, the verdict goes in a pull request of its own straight after the merge, and
 nothing is published until it lands.
 
-Publishing enforces it. The publish workflow refuses to publish a package with
-no accepted review on record for the exact version in its `package.json`, and
-`pnpm review` runs the same check locally. Beyond that, ALMA will not start
+Publishing enforces it. From `1.0.0` on, the publish workflow refuses to
+publish a package with no accepted review on record for the exact version in its
+`package.json`, and `pnpm review` runs the same check locally. Beyond that, ALMA will not start
 running a connector whose entry in `connectors.lock.json` nobody wrote, and
 writing that entry means filling in the link to this file.
 

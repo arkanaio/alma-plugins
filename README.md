@@ -17,8 +17,10 @@ name keeps "plugin" for continuity with the product documentation.
 
 Phase C of the
 [ALMA roadmap](https://github.com/arkanaio/alma/blob/main/docs/ROADMAP.md), in
-progress. The contract is published at `0.1.0` and stays below `1.0.0` while the
-first connectors of the initial catalogue are built.
+progress. The contract is published at `0.1.1` and stays below `1.0.0` while the
+first connectors of the initial catalogue are built. Until then, every merge to
+`main` publishes the versions it bumps, and the per-version security review is
+waived ([docs/SECURITY-REVIEW.md](docs/SECURITY-REVIEW.md#before-100)).
 
 This repository **does not yet accept external contributions of new
 connectors**. The security review they go through is settled and written down;
@@ -60,7 +62,8 @@ uses.
 ## Contributing
 
 Read [CONTRIBUTING.md](CONTRIBUTING.md). Every contribution goes through
-automated tests and a human security review before it is published.
+automated tests, and from `1.0.0` on a human security review, before it is
+published.
 
 ## Language
 

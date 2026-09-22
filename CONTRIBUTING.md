@@ -196,7 +196,11 @@ the known limits: quotas, delays, fields the provider does not offer.
 
 ## How it is reviewed and published
 
-Automated tests, then a human security review, then a published version. The
+Automated tests, then a human security review, then a published version.
+While a package is below `1.0.0` the review is waived and merging publishes it
+directly: see [Before 1.0.0](docs/SECURITY-REVIEW.md#before-100). To release a
+version, bump it in the connector's `package.json` and in its manifest in the
+same pull request; a merge that bumps nothing publishes nothing. The
 process is [docs/SECURITY-REVIEW.md](docs/SECURITY-REVIEW.md) and the checklist
 someone fills in about your code is [reviews/TEMPLATE.md](reviews/TEMPLATE.md).
 Read it before you open the pull request: it is not a secret, and nothing in it
