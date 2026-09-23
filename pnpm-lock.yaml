@@ -18,6 +18,15 @@ importers:
         specifier: 5.9.3
         version: 5.9.3
 
+  connectors/atlassian-licenses:
+    dependencies:
+      '@arkanaio/connector-contract':
+        specifier: 0.1.1
+        version: 0.1.1
+      zod:
+        specifier: 4.4.3
+        version: 4.4.3
+
   connectors/example:
     dependencies:
       '@arkanaio/connector-contract':
@@ -126,7 +135,7 @@ snapshots:
 
   '@arkanaio/connector-contract@0.1.1':
     dependencies:
-      zod: 4.1.13
+      zod: 4.4.3
 
   '@biomejs/biome@2.5.7':
     optionalDependencies:

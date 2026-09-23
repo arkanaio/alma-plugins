@@ -1,0 +1,76 @@
+{
+  "ari:cloud:confluence::site/00000000-0000-4000-8000-000000000001 ": {
+    "data": [
+      {
+        "accountId": "sample-account-3",
+        "accountType": "atlassian",
+        "status": "active",
+        "accountStatus": "active",
+        "membershipStatus": "active",
+        "name": "Sam Rivera",
+        "email": "sam@example.invalid",
+        "claimStatus": "managed",
+        "productAccess": [
+          {
+            "key": "confluence",
+            "id": "ari:cloud:confluence::site/00000000-0000-4000-8000-000000000001",
+            "lastActiveTimestamp": "2026-09-18T07:45:10.123456789Z"
+          }
+        ]
+      }
+    ],
+    "links": { "self": "c2VsZi1jb25mbHVlbmNl" }
+  },
+  "ari:cloud:jira-software::site/00000000-0000-4000-8000-000000000001 ": {
+    "data": [
+      {
+        "accountId": "sample-account-1",
+        "accountType": "atlassian",
+        "status": "active",
+        "accountStatus": "active",
+        "membershipStatus": "active",
+        "name": "Alex Moreno",
+        "email": "Alex@Example.invalid",
+        "claimStatus": "managed",
+        "productAccess": [
+          {
+            "key": "jira",
+            "id": "ari:cloud:jira-software::site/00000000-0000-4000-8000-000000000001",
+            "lastActiveTimestamp": "2026-09-19T16:20:00.000Z"
+          },
+          {
+            "key": "confluence",
+            "id": "ari:cloud:confluence::site/00000000-0000-4000-8000-000000000001",
+            "lastActiveTimestamp": "2026-08-01T10:00:00.000Z"
+          }
+        ]
+      },
+      {
+        "accountId": "sample-account-2",
+        "accountType": "atlassian",
+        "status": "active",
+        "accountStatus": "active",
+        "membershipStatus": "active",
+        "name": "Former contractor",
+        "claimStatus": "unmanaged",
+        "productAccess": []
+      }
+    ],
+    "links": { "self": "c2VsZi1qaXJhLTE", "next": "dXNlcnMtamlyYS0y" }
+  },
+  "ari:cloud:jira-software::site/00000000-0000-4000-8000-000000000001 dXNlcnMtamlyYS0y": {
+    "data": [
+      {
+        "accountId": "sample-account-3",
+        "accountType": "atlassian",
+        "status": "active",
+        "accountStatus": "active",
+        "membershipStatus": "active",
+        "name": "Sam Rivera",
+        "email": "sam@example.invalid",
+        "claimStatus": "managed"
+      }
+    ],
+    "links": { "self": "dXNlcnMtamlyYS0y", "prev": "c2VsZi1qaXJhLTE" }
+  }
+}

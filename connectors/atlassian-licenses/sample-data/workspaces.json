@@ -1,0 +1,92 @@
+{
+  "": {
+    "data": [
+      {
+        "id": "ari:cloud:jira-software::site/00000000-0000-4000-8000-000000000001",
+        "type": "workspace",
+        "attributes": {
+          "name": "example",
+          "typeKey": "jira-software",
+          "type": "Jira",
+          "owner": null,
+          "status": "online",
+          "statusDetails": [],
+          "icons": {},
+          "avatars": {},
+          "labels": [],
+          "sandbox": { "type": "NONE" },
+          "usage": null,
+          "capacity": 50,
+          "createdAt": "2024-02-01T09:00:00.000Z",
+          "hostUrl": "https://example.atlassian.net",
+          "realm": "eu",
+          "regions": ["eu-west-1"]
+        },
+        "links": {
+          "self": "https://api.atlassian.com/admin/v2/orgs/sample-org/workspaces/1"
+        },
+        "relationships": {
+          "entitlement": [
+            {
+              "id": "sample-entitlement-1",
+              "type": "entitlement",
+              "attributes": {
+                "key": "jira-software",
+                "planKey": "standard",
+                "plan": "Standard"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "ari:cloud:jira-software::site/00000000-0000-4000-8000-000000000009",
+        "type": "workspace",
+        "attributes": {
+          "name": "example-sandbox",
+          "typeKey": "jira-software",
+          "type": "Jira",
+          "status": "online",
+          "sandbox": { "type": "CHILD" },
+          "capacity": 50,
+          "hostUrl": "https://example-sandbox.atlassian.net"
+        },
+        "links": {
+          "self": "https://api.atlassian.com/admin/v2/orgs/sample-org/workspaces/9"
+        }
+      }
+    ],
+    "links": {
+      "self": "https://api.atlassian.com/admin/v2/orgs/sample-org/workspaces",
+      "next": "https://api.atlassian.com/admin/v2/orgs/sample-org/workspaces?cursor=d29ya3NwYWNlcy0y"
+    },
+    "meta": { "pageSize": 2, "startIndex": 0, "endIndex": 1, "total": 3 }
+  },
+  "d29ya3NwYWNlcy0y": {
+    "data": [
+      {
+        "id": "ari:cloud:confluence::site/00000000-0000-4000-8000-000000000001",
+        "type": "workspace",
+        "attributes": {
+          "name": "example",
+          "typeKey": "confluence",
+          "type": "Confluence",
+          "owner": null,
+          "status": "online",
+          "sandbox": null,
+          "capacity": null,
+          "hostUrl": "https://example.atlassian.net/wiki",
+          "realm": "eu",
+          "regions": ["eu-west-1"]
+        },
+        "links": {
+          "self": "https://api.atlassian.com/admin/v2/orgs/sample-org/workspaces/2"
+        }
+      }
+    ],
+    "links": {
+      "self": "https://api.atlassian.com/admin/v2/orgs/sample-org/workspaces"
+    },
+    "meta": { "pageSize": 1, "startIndex": 2, "endIndex": 2, "total": 3 }
+  }
+}
