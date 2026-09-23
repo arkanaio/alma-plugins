@@ -28,6 +28,14 @@ what is not finished is the repository around it
 ([arkanaio/alma#365](https://github.com/arkanaio/alma/issues/365)). It does
 accept fixes, questions and provider proposals through an issue.
 
+## Deferred connectors
+
+The ChatGPT license connector was withdrawn on September 23, 2026. API access
+could not be validated with the target Team/Business workspace. It will be
+reconsidered when an API suitable for the required license data is available
+and can be validated against a real workspace. Existing published npm versions
+are not removed by this repository change.
+
 ## What is here
 
 | Path | What it is |
