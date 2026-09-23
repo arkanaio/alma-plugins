@@ -2,6 +2,7 @@ import {
   type ConnectorContext,
   type ConnectorDefinition,
   ConnectorError,
+  type ConnectorLicensePage,
   defineConnector,
 } from "@arkanaio/connector-contract";
 import { z } from "zod";
@@ -18,6 +19,9 @@ import {
 const apiRoot = "https://api.atlassian.com/admin";
 const maximumWorkspacePages = 10;
 const maximumCursorLength = 2048;
+// Each search returns up to 100 accounts, so a page stays within the
+// contract's 1,000 seats and within a few seconds of provider calls.
+const maximumSearchesPerPage = 5;
 
 /**
  * The roles Atlassian bills for. Guests, customers, contributors, basic users,
@@ -97,6 +101,15 @@ async function listWorkspaces(request: Request): Promise<Workspace[]> {
   return [...workspaces.values()].sort((left, right) =>
     left.id < right.id ? -1 : left.id > right.id ? 1 : 0,
   );
+}
+
+/**
+ * Only sites on a paid plan hold licenses. Free plans and sites Atlassian
+ * reports without a plan are not read: they have no cost to manage.
+ */
+function isPaid(workspace: Workspace): boolean {
+  const plan = planOf(workspace);
+  return plan !== null && !/^(free|none)$/i.test(plan.trim());
 }
 
 function siteOf(workspace: Workspace): string | null {
@@ -179,60 +192,67 @@ export const atlassianLicensesConnector: ConnectorDefinition = defineConnector({
       };
       const state = cursor === null ? null : decodeCursor(cursor);
 
-      const workspaces = await listWorkspaces(request);
+      const workspaces = (await listWorkspaces(request)).filter(isPaid);
       // A site removed mid-read is skipped, not retried: the next one in the
       // same order continues the read.
-      const current = state
+      let current = state
         ? workspaces.find((workspace) => workspace.id >= state.workspace)
         : workspaces[0];
-      if (!current)
-        return {
-          cursor: null,
-          plans: state ? [] : workspaces.map(planFor),
-          seats: [],
-        };
-      const usersCursor = state?.workspace === current.id ? state.users : null;
+      let usersCursor =
+        current && state?.workspace === current.id ? state.users : null;
+      const read: Workspace[] = [];
+      const seats: ConnectorLicensePage["seats"][number][] = [];
+      let next: Cursor | null = null;
 
-      const body = userPageSchema.safeParse(
-        await post(request, "/directories/-/users/search", {
-          limit: 100,
-          resourceIds: [current.id],
-          roleIds: billableRoles,
-          status: ["active"],
-          expand: ["productAccess"],
-          ...(usersCursor === null ? {} : { cursor: usersCursor }),
-        }),
-      );
-      if (!body.success)
-        throw new ConnectorError("contract", "unexpected_payload");
-
-      const nextUsers = body.data.links?.next ?? null;
-      if (nextUsers !== null && nextUsers === usersCursor)
-        throw new ConnectorError("contract", "pagination_did_not_advance");
-      const following = workspaces[workspaces.indexOf(current) + 1];
-      const next: Cursor | null =
-        nextUsers !== null
-          ? { version: 1, workspace: current.id, users: nextUsers }
-          : following
-            ? { version: 1, workspace: following.id, users: null }
-            : null;
-
-      return {
-        cursor: next === null ? null : encodeCursor(next),
-        plans: state ? [planFor(current)] : workspaces.map(planFor),
-        seats: body.data.data.map((user) => {
+      // Several sites per page, so an organization with a handful of products
+      // finishes in one or two pages instead of one page per product.
+      for (let searches = 0; current; searches++) {
+        if (searches >= maximumSearchesPerPage) {
+          next = { version: 1, workspace: current.id, users: usersCursor };
+          break;
+        }
+        const site: Workspace = current;
+        const body = userPageSchema.safeParse(
+          await post(request, "/directories/-/users/search", {
+            limit: 100,
+            resourceIds: [site.id],
+            roleIds: billableRoles,
+            status: ["active"],
+            expand: ["productAccess"],
+            ...(usersCursor === null ? {} : { cursor: usersCursor }),
+          }),
+        );
+        if (!body.success)
+          throw new ConnectorError("contract", "unexpected_payload");
+        const nextUsers = body.data.links?.next ?? null;
+        if (nextUsers !== null && nextUsers === usersCursor)
+          throw new ConnectorError("contract", "pagination_did_not_advance");
+        if (!read.includes(site)) read.push(site);
+        for (const user of body.data.data) {
           const email = emailSchema.safeParse(user.email?.toLowerCase());
-          return {
+          seats.push({
             accountExternalId: user.accountId,
             accountEmail: email.success ? email.data : null,
             accountName: user.name || null,
             lastActivityAt: activityAt(
-              user.productAccess?.find((access) => access.id === current.id)
+              user.productAccess?.find((access) => access.id === site.id)
                 ?.lastActiveTimestamp,
             ),
-            planExternalId: current.id,
-          };
-        }),
+            planExternalId: site.id,
+          });
+        }
+        if (nextUsers !== null) {
+          usersCursor = nextUsers;
+          continue;
+        }
+        current = workspaces[workspaces.indexOf(site) + 1];
+        usersCursor = null;
+      }
+
+      return {
+        cursor: next === null ? null : encodeCursor(next),
+        plans: (state ? read : workspaces).map(planFor),
+        seats,
       };
     },
   },

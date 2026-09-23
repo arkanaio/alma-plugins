@@ -94,18 +94,19 @@ test("the manifest satisfies the contract and declares what activity measures", 
   });
 });
 
-test("walks every site and every page of billable accounts", async () => {
+test("reads every paid site and every page of accounts in one page", async () => {
   const pages = await readAll();
-  assert.equal(pages.length, 3);
+  // Three searches (Confluence, then two pages of Jira) fit in one page.
+  assert.equal(pages.length, 1);
   const first = pages[0];
   assert.ok(first);
+  assert.equal(first.cursor, null);
   assert.deepEqual(
     first.plans.map((plan) => plan.externalId),
     [confluence, jira],
   );
-  const seats = pages.flatMap((page) => page.seats);
   assert.deepEqual(
-    seats.map((seat) => [seat.planExternalId, seat.accountExternalId]),
+    first.seats.map((seat) => [seat.planExternalId, seat.accountExternalId]),
     [
       [confluence, "sample-account-3"],
       [jira, "sample-account-1"],
@@ -113,14 +114,63 @@ test("walks every site and every page of billable accounts", async () => {
       [jira, "sample-account-3"],
     ],
   );
-  // Later pages repeat only the plan their accounts belong to, unchanged.
-  for (const page of pages.slice(1)) {
-    for (const plan of page.plans)
-      assert.deepEqual(
-        plan,
-        first.plans.find((value) => value.externalId === plan.externalId),
-      );
-  }
+});
+
+test("sites on a free plan or with no plan are not read", async () => {
+  const { page, requests } = await read();
+  const ids = page.plans.map((plan) => plan.externalId);
+  assert.ok(!ids.some((id) => id.includes("compass")));
+  assert.ok(!ids.some((id) => id.includes("statuspage")));
+  const searched = requests
+    .filter((request) => request.url.includes("/users/search"))
+    .map((request) => (request.body.resourceIds as string[])[0]);
+  assert.ok(
+    searched.every((id) => id === confluence || id === jira),
+    "no search is spent on a site that is not read",
+  );
+});
+
+test("a page stops after five searches and continues where it stopped", async () => {
+  const sites = Array.from(
+    { length: 7 },
+    (_, index) => `ari:cloud:jira-software::site/paid-${index}`,
+  );
+  const many: Responder = (url, body) => {
+    if (url.endsWith("/workspaces"))
+      return Response.json({
+        data: sites.map((id) => ({
+          id,
+          attributes: { typeKey: "jira-software", type: "Jira", name: id },
+          relationships: { entitlement: [{ attributes: { plan: "Premium" } }] },
+        })),
+        links: {},
+      });
+    const site = (body.resourceIds as string[])[0];
+    return Response.json({
+      data: [{ accountId: `account-${site}`, name: "Someone" }],
+      links: {},
+    });
+  };
+  const first = await read(null, many);
+  assert.equal(
+    first.requests.filter((request) => request.url.includes("/users/search"))
+      .length,
+    5,
+  );
+  assert.equal(first.page.plans.length, 7);
+  assert.equal(first.page.seats.length, 5);
+  assert.ok(first.page.cursor);
+  const second = await read(first.page.cursor, many);
+  assert.equal(second.page.cursor, null);
+  // Later pages repeat only the plans their accounts belong to.
+  assert.deepEqual(
+    second.page.plans.map((plan) => plan.externalId),
+    sites.slice(5),
+  );
+  assert.deepEqual(
+    second.page.seats.map((seat) => seat.planExternalId),
+    sites.slice(5),
+  );
 });
 
 test("names each product site and keeps the seat limit only when Atlassian gives one", async () => {
@@ -136,7 +186,7 @@ test("names each product site and keeps the seat limit only when Atlassian gives
   });
   assert.equal(
     byId.get(confluence)?.name,
-    "Confluence · example.atlassian.net",
+    "Confluence Standard · example.atlassian.net",
   );
   // No capacity is unknown, never the number of accounts detected.
   assert.equal(byId.get(confluence)?.seatCount, null);

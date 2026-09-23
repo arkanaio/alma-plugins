@@ -32,12 +32,12 @@ export const manifest = {
     },
   ],
   description:
-    "Reads each Atlassian Cloud product site, the seat limit Atlassian reports for it and the accounts holding a billable role. No prices.",
+    "Reads each Atlassian Cloud product site on a paid plan, the seat limit Atlassian reports for it and the accounts holding a billable role. No prices.",
   documentationUrl:
     "https://github.com/arkanaio/alma-plugins/tree/main/connectors/atlassian-licenses",
   id: "atlassian_licenses",
   name: "Atlassian",
   pricing: { exposesBillingCycle: false, exposesPricePerSeat: false },
   supportLevel: "official",
-  version: "0.1.0",
+  version: "0.1.1",
 } as const;

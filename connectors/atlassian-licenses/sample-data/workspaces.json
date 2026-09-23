@@ -14,7 +14,9 @@
           "icons": {},
           "avatars": {},
           "labels": [],
-          "sandbox": { "type": "NONE" },
+          "sandbox": {
+            "type": "NONE"
+          },
           "usage": null,
           "capacity": 50,
           "createdAt": "2024-02-01T09:00:00.000Z",
@@ -47,7 +49,9 @@
           "typeKey": "jira-software",
           "type": "Jira",
           "status": "online",
-          "sandbox": { "type": "CHILD" },
+          "sandbox": {
+            "type": "CHILD"
+          },
           "capacity": 50,
           "hostUrl": "https://example-sandbox.atlassian.net"
         },
@@ -60,7 +64,12 @@
       "self": "https://api.atlassian.com/admin/v2/orgs/sample-org/workspaces",
       "next": "https://api.atlassian.com/admin/v2/orgs/sample-org/workspaces?cursor=d29ya3NwYWNlcy0y"
     },
-    "meta": { "pageSize": 2, "startIndex": 0, "endIndex": 1, "total": 3 }
+    "meta": {
+      "pageSize": 2,
+      "startIndex": 0,
+      "endIndex": 1,
+      "total": 3
+    }
   },
   "d29ya3NwYWNlcy0y": {
     "data": [
@@ -81,12 +90,75 @@
         },
         "links": {
           "self": "https://api.atlassian.com/admin/v2/orgs/sample-org/workspaces/2"
+        },
+        "relationships": {
+          "entitlement": [
+            {
+              "id": "sample-entitlement-2",
+              "type": "entitlement",
+              "attributes": {
+                "key": "confluence",
+                "planKey": "standard",
+                "plan": "Standard"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "ari:cloud:compass::site/00000000-0000-4000-8000-000000000001",
+        "type": "workspace",
+        "attributes": {
+          "name": "example",
+          "typeKey": "compass",
+          "type": "Compass",
+          "status": "online",
+          "sandbox": null,
+          "capacity": null,
+          "hostUrl": "https://example.atlassian.net"
+        },
+        "links": {
+          "self": "https://api.atlassian.com/admin/v2/orgs/sample-org/workspaces/3"
+        },
+        "relationships": {
+          "entitlement": [
+            {
+              "id": "sample-entitlement-3",
+              "type": "entitlement",
+              "attributes": {
+                "key": "compass",
+                "planKey": "free",
+                "plan": "Free"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": "ari:cloud:statuspage::site/00000000-0000-4000-8000-000000000001",
+        "type": "workspace",
+        "attributes": {
+          "name": "example",
+          "typeKey": "statuspage",
+          "type": "Statuspage",
+          "status": "online",
+          "sandbox": null,
+          "capacity": null,
+          "hostUrl": "https://manage.statuspage.io"
+        },
+        "links": {
+          "self": "https://api.atlassian.com/admin/v2/orgs/sample-org/workspaces/4"
         }
       }
     ],
     "links": {
       "self": "https://api.atlassian.com/admin/v2/orgs/sample-org/workspaces"
     },
-    "meta": { "pageSize": 1, "startIndex": 2, "endIndex": 2, "total": 3 }
+    "meta": {
+      "pageSize": 3,
+      "startIndex": 2,
+      "endIndex": 4,
+      "total": 5
+    }
   }
 }
