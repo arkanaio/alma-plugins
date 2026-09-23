@@ -1,0 +1,29 @@
+{
+  "name": "@arkanaio/connector-chatgpt-licenses",
+  "version": "0.1.0",
+  "description": "ChatGPT Enterprise and Edu workspace seats for ALMA.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arkanaio/alma-plugins.git",
+    "directory": "connectors/chatgpt-licenses"
+  },
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "prepack": "pnpm build"
+  },
+  "dependencies": {
+    "@arkanaio/connector-contract": "0.1.1",
+    "zod": "4.4.3"
+  }
+}
