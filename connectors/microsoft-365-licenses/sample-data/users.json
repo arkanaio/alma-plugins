@@ -1,0 +1,16 @@
+{
+  "value": [
+    {
+      "id": "10000000-0000-0000-0000-000000000001",
+      "displayName": "Example Member",
+      "mail": "MEMBER@example.invalid",
+      "userPrincipalName": "member@example.invalid"
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000002",
+      "displayName": null,
+      "mail": null,
+      "userPrincipalName": "guest_example.invalid#EXT#@example.invalid"
+    }
+  ]
+}

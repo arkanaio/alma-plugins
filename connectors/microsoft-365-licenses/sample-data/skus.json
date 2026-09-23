@@ -1,0 +1,39 @@
+{
+  "value": [
+    {
+      "skuId": "00000000-0000-0000-0000-000000000001",
+      "skuPartNumber": "EXAMPLE_USER_PRODUCT",
+      "appliesTo": "User",
+      "prepaidUnits": {
+        "enabled": 25,
+        "warning": 3,
+        "suspended": 2,
+        "lockedOut": 1
+      },
+      "consumedUnits": 2
+    },
+    {
+      "skuId": "00000000-0000-0000-0000-000000000002",
+      "skuPartNumber": "EXAMPLE_UNKNOWN_CAPACITY",
+      "appliesTo": "User",
+      "prepaidUnits": null,
+      "consumedUnits": 0
+    },
+    {
+      "skuId": "00000000-0000-0000-0000-000000000003",
+      "skuPartNumber": "EXAMPLE_COMPANY_PRODUCT",
+      "appliesTo": "Company",
+      "prepaidUnits": {
+        "enabled": 10
+      }
+    },
+    {
+      "skuId": "00000000-0000-0000-0000-000000000004",
+      "skuPartNumber": "EXAMPLE_ZERO_CAPACITY",
+      "appliesTo": "User",
+      "prepaidUnits": {
+        "enabled": 0
+      }
+    }
+  ]
+}

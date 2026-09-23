@@ -45,6 +45,15 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
 
+  connectors/microsoft-365-licenses:
+    dependencies:
+      '@arkanaio/connector-contract':
+        specifier: 0.1.1
+        version: 0.1.1
+      zod:
+        specifier: 4.4.3
+        version: 4.4.3
+
   contract:
     dependencies:
       zod:
