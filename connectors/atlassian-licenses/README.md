@@ -32,16 +32,21 @@ the read fails with `credentials`, and the organization has to create a new key.
 1. `POST /admin/v2/orgs/{orgId}/workspaces` lists the product sites. Each site
    is one plan. Its `externalId` is the site's ARI, which is stable, and its name
    combines the product, the plan Atlassian reports and the site host, such as
-   `Jira Standard · example.atlassian.net`. Sandboxes (`sandbox.type` `CHILD`)
-   are skipped: they copy a production site and hold no seats of their own.
+   `Jira Standard · example.atlassian.net`. Only sites on a paid plan are
+   read: a site whose plan is `Free`, `None` or missing (Goals, Projects, Rovo
+   or Compass on their free plans, for example) has no cost to manage and is
+   skipped. Sandboxes (`sandbox.type` `CHILD`) are skipped too: they copy a
+   production site and hold no seats of their own.
 2. `POST /admin/v2/orgs/{orgId}/directories/-/users/search`, once per site,
    lists the active accounts with the `atlassian/user` or `atlassian/admin`
    role on it, 100 per page. `-` searches every directory the key can manage.
    Each account is a seat with its Atlassian account ID, email and name.
 
-The cursor names the site being read and Atlassian's cursor inside it. If a site
-disappears in the middle of a read, the read continues with the next site in the
-same order.
+One page covers up to five searches, moving on to the next site when one is
+finished, so an organization with a handful of paid products is read in one or
+two pages. The cursor names the site being read and Atlassian's cursor inside
+it. If a site disappears in the middle of a read, the read continues with the
+next site in the same order.
 
 ## Data and limits
 
