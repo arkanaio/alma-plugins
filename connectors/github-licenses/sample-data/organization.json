@@ -1,0 +1,14 @@
+{
+  "login": "example-org",
+  "id": 900001,
+  "node_id": "O_kgDOexample",
+  "type": "Organization",
+  "two_factor_requirement_enabled": true,
+  "plan": {
+    "name": "enterprise",
+    "space": 976562499,
+    "private_repos": 999999,
+    "filled_seats": 4,
+    "seats": 50
+  }
+}

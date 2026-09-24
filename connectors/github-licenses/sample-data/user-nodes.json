@@ -1,0 +1,29 @@
+{
+  "U_kgDOexample01": {
+    "databaseId": 100001,
+    "login": "example-owner",
+    "name": "Example Owner",
+    "organizationVerifiedDomainEmails": ["OWNER@example.invalid"]
+  },
+  "U_kgDOexample02": {
+    "databaseId": 100002,
+    "login": "example-member",
+    "name": "Example Member",
+    "organizationVerifiedDomainEmails": [
+      "member@example.invalid",
+      "alias@example.invalid"
+    ]
+  },
+  "U_kgDOexample03": {
+    "databaseId": 100003,
+    "login": "example-no-domain",
+    "name": null,
+    "organizationVerifiedDomainEmails": []
+  },
+  "U_kgDOexample04": {
+    "databaseId": 100004,
+    "login": "example-contractor",
+    "name": "Example Contractor",
+    "organizationVerifiedDomainEmails": []
+  }
+}

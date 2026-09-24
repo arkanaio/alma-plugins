@@ -36,6 +36,15 @@ importers:
         specifier: ^4.1.13
         version: 4.1.13
 
+  connectors/github-licenses:
+    dependencies:
+      '@arkanaio/connector-contract':
+        specifier: workspace:0.2.0
+        version: link:../../contract
+      zod:
+        specifier: 4.4.3
+        version: 4.4.3
+
   connectors/google-workspace-licenses:
     dependencies:
       '@arkanaio/connector-contract':
