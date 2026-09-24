@@ -1,6 +1,6 @@
 {
   "name": "@arkanaio/connector-microsoft-365-licenses",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Microsoft 365 license products, capacity and assignments for ALMA.",
   "license": "Apache-2.0",
   "type": "module",
@@ -23,7 +23,7 @@
     "prepack": "pnpm build"
   },
   "dependencies": {
-    "@arkanaio/connector-contract": "0.1.1",
+    "@arkanaio/connector-contract": "workspace:0.2.0",
     "zod": "4.4.3"
   }
 }

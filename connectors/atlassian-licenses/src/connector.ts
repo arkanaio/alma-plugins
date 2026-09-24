@@ -134,7 +134,7 @@ function planOf(workspace: Workspace): string | null {
   return null;
 }
 
-function planFor(workspace: Workspace) {
+function planFor(workspace: Workspace, observedOn: string) {
   const product = workspace.attributes.type || workspace.attributes.typeKey;
   const edition = [product, planOf(workspace)].filter(Boolean).join(" ");
   const site = siteOf(workspace);
@@ -146,7 +146,16 @@ function planFor(workspace: Workspace) {
     currency: null,
     // Atlassian reports the seat limit of a site only when it has license data
     // for it. Without it, the purchased total is unknown, never the accounts.
-    seatCount: workspace.attributes.capacity ?? null,
+    purchasedQuantity:
+      workspace.attributes.capacity == null
+        ? null
+        : {
+            value: workspace.attributes.capacity,
+            unit: "person" as const,
+            source: "attributes.capacity",
+            observedOn,
+          },
+    consumedQuantity: null,
   };
 }
 
@@ -251,7 +260,9 @@ export const atlassianLicensesConnector: ConnectorDefinition = defineConnector({
 
       return {
         cursor: next === null ? null : encodeCursor(next),
-        plans: (state ? read : workspaces).map(planFor),
+        plans: (state ? read : workspaces).map((workspace) =>
+          planFor(workspace, context.now().toISOString().slice(0, 10)),
+        ),
         seats,
       };
     },

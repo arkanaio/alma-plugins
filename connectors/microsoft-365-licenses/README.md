@@ -34,7 +34,7 @@ includes all Graph application permissions granted to that app.
 - Only SKUs whose `appliesTo` is `User`. Company-wide entitlements cannot be
   represented as user seats and are excluded. Products with no assignments
   remain in the catalogue.
-- `seatCount` is `prepaidUnits.enabled`, the units enabled for active
+- `purchasedQuantity.value` is `prepaidUnits.enabled`, the units enabled for active
   subscriptions. Missing capacity is `null`; reported zero remains zero.
   Warning/grace-period, suspended and locked-out units are not added. This is
   active licensed capacity, **not a price, proof of a paid purchase, invoice
@@ -50,12 +50,12 @@ includes all Graph application permissions granted to that app.
 - Price, currency and billing cycle are always `null`. Last activity is not
   declared and is always `null`. Generic sign-ins are not license usage.
 
-Graph also exposes `consumedUnits`. Contract 0.1.1 has no separate field for a
-provider-reported consumed total, its provenance, or its measurement date, so
-this connector does **not** substitute it for capacity or create fake account
-assignments from it. ALMA's product model for additional license quantities
-(arkanaio/alma#557) must support that value before it can be persisted separately.
-The host timestamps successful readings, as for the other connectors.
+`consumedQuantity.value` independently preserves Graph's `consumedUnits` aggregate.
+Both readings use unit `person`, their exact Graph field as `source`, and the
+UTC date of `context.now()` as `observedOn`. Either reading can be unknown while
+the other is known; neither is reconstructed from the paginated account list.
+A consumed total never creates account assignments. It measures assignment,
+not activity or usage intensity.
 
 ## Requests and limits
 
