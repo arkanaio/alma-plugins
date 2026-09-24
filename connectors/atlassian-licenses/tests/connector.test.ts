@@ -173,7 +173,7 @@ test("a page stops after five searches and continues where it stopped", async ()
   );
 });
 
-test("names each product site and keeps the seat limit only when Atlassian gives one", async () => {
+test("names each product site and never takes the plan ceiling for a purchase", async () => {
   const { page } = await read();
   const byId = new Map(page.plans.map((plan) => [plan.externalId, plan]));
   assert.deepEqual(byId.get(jira), {
@@ -182,19 +182,14 @@ test("names each product site and keeps the seat limit only when Atlassian gives
     billingCycle: null,
     pricePerSeat: null,
     currency: null,
-    purchasedQuantity: {
-      value: 50,
-      unit: "person",
-      source: "attributes.capacity",
-      observedOn: "2026-09-20",
-    },
+    // The sample site reports capacity 50: a ceiling, not a purchase.
+    purchasedQuantity: null,
     consumedQuantity: null,
   });
   assert.equal(
     byId.get(confluence)?.name,
     "Confluence Standard · example.atlassian.net",
   );
-  // No capacity is unknown, never the number of accounts detected.
   assert.equal(byId.get(confluence)?.purchasedQuantity, null);
   assert.equal(byId.has(sandbox), false);
 });

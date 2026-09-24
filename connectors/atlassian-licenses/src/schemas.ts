@@ -45,7 +45,6 @@ export const workspacePageSchema = z.object({
           typeKey: z.string().trim().min(1).max(200),
           status: z.string().max(50).nullish(),
           sandbox: z.object({ type: z.string().max(50).nullish() }).nullish(),
-          capacity: z.int().min(0).max(1_000_000).nullish(),
           hostUrl: z.string().max(500).nullish(),
         }),
         relationships: z.record(z.string(), relationshipSchema).nullish(),
