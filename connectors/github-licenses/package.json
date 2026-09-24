@@ -1,0 +1,29 @@
+{
+  "name": "@arkanaio/connector-github-licenses",
+  "version": "0.1.0",
+  "description": "GitHub plan and Copilot seats, capacity and assignments for ALMA.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arkanaio/alma-plugins.git",
+    "directory": "connectors/github-licenses"
+  },
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "prepack": "pnpm build"
+  },
+  "dependencies": {
+    "@arkanaio/connector-contract": "workspace:0.2.0",
+    "zod": "4.4.3"
+  }
+}

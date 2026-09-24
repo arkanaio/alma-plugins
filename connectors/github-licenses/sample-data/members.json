@@ -1,0 +1,23 @@
+[
+  {
+    "login": "example-owner",
+    "id": 100001,
+    "node_id": "U_kgDOexample01",
+    "type": "User",
+    "site_admin": false
+  },
+  {
+    "login": "example-member",
+    "id": 100002,
+    "node_id": "U_kgDOexample02",
+    "type": "User",
+    "site_admin": false
+  },
+  {
+    "login": "example-no-domain",
+    "id": 100003,
+    "node_id": "U_kgDOexample03",
+    "type": "User",
+    "site_admin": false
+  }
+]
