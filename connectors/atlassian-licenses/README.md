@@ -50,9 +50,9 @@ next site in the same order.
 
 ## Data and limits
 
-- **Purchased seats.** `seatCount` is the site's `capacity`, the seat limit
+- **Purchased seats.** `purchasedQuantity` contains the site's `capacity`, the seat limit
   Atlassian reports when it has license data for that site. When it does not,
-  `seatCount` is `null`: unknown, never replaced by the number of accounts
+  `purchasedQuantity` is `null`: unknown, never replaced by the number of accounts
   detected. Atlassian bills Jira and Confluence by user tier, so the limit can
   be higher than what the organization uses.
 - **Billable roles only.** Guests, Jira Service Management customers,
@@ -85,3 +85,7 @@ data. The tests serve them through the real `createConnectorFetch` built from
 this manifest's `allowedHosts`, and never contact Atlassian. Build with
 `pnpm --filter @arkanaio/connector-atlassian-licenses build` and run
 `pnpm verify` before review.
+
+Quantity provenance is `attributes.capacity`, its unit is `person`, and its
+observation date is the UTC read date. `consumedQuantity` is always `null`;
+the account list is not a provider aggregate.

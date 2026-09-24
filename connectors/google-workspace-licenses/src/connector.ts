@@ -74,7 +74,8 @@ export const googleWorkspaceLicensesConnector: ConnectorDefinition =
             billingCycle: null,
             pricePerSeat: null,
             currency: null,
-            seatCount: null,
+            purchasedQuantity: null,
+            consumedQuantity: null,
           })),
           seats: body.data.items.map((assignment) => ({
             // Licensing exposes only the current primary email, not a stable

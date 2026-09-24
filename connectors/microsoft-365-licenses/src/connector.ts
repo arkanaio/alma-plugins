@@ -74,11 +74,28 @@ async function accessToken(context: ConnectorContext): Promise<string> {
   return result.data.access_token;
 }
 
-function plan(sku: Sku) {
+function plan(sku: Sku, observedOn: string) {
   return {
     externalId: sku.skuId,
     name: sku.skuPartNumber,
-    seatCount: sku.prepaidUnits?.enabled ?? null,
+    purchasedQuantity:
+      sku.prepaidUnits?.enabled == null
+        ? null
+        : {
+            value: sku.prepaidUnits.enabled,
+            unit: "person" as const,
+            source: "prepaidUnits.enabled",
+            observedOn,
+          },
+    consumedQuantity:
+      sku.consumedUnits == null
+        ? null
+        : {
+            value: sku.consumedUnits,
+            unit: "person" as const,
+            source: "consumedUnits",
+            observedOn,
+          },
     pricePerSeat: null,
     currency: null,
     billingCycle: null,
@@ -177,7 +194,7 @@ export const microsoft365LicensesConnector: ConnectorDefinition =
           );
         const catalog = skuPageSchema.safeParse(
           await get(
-            `${graph}/subscribedSkus?$select=skuId,skuPartNumber,appliesTo,prepaidUnits`,
+            `${graph}/subscribedSkus?$select=skuId,skuPartNumber,appliesTo,prepaidUnits,consumedUnits`,
           ),
         );
         if (!catalog.success)
@@ -237,7 +254,13 @@ export const microsoft365LicensesConnector: ConnectorDefinition =
           : null;
         if (next !== null && next.length > 2048)
           throw new ConnectorError("contract", "cursor_too_long");
-        return { cursor: next, plans: skus.map(plan), seats };
+        return {
+          cursor: next,
+          plans: skus.map((sku) =>
+            plan(sku, context.now().toISOString().slice(0, 10)),
+          ),
+          seats,
+        };
       },
     },
   });

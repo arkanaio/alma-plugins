@@ -135,12 +135,18 @@ export async function readPurchasedLicenses(
         throw new ConnectorError("contract", "missing_license_count");
       const [, externalId, name] = metric;
       const previous = plans.get(externalId);
-      if (previous && previous.seatCount !== parameter.intValue)
+      if (previous && previous.purchasedQuantity?.value !== parameter.intValue)
         throw new ConnectorError("contract", "conflicting_license_count");
       plans.set(externalId, {
         externalId,
         name,
-        seatCount: parameter.intValue,
+        purchasedQuantity: {
+          value: parameter.intValue,
+          unit: "person",
+          source: parameter.name,
+          observedOn: report.date,
+        },
+        consumedQuantity: null,
         pricePerSeat: null,
         currency: null,
         billingCycle: null,

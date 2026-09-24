@@ -73,3 +73,8 @@ real host boundary with an in-memory transport and never contact Google.
 Build with `pnpm --filter @arkanaio/connector-google-workspace-licenses build`.
 Run `pnpm verify` before review. Version 0.1.1 requires its own human security
 review and publication before it can be incorporated into ALMA.
+
+Under contract 0.2.0, assignment pages have both quantities set to `null`.
+Report pages expose `purchasedQuantity` with unit `person`, the exact metric
+name as source and the Google report date as `observedOn`. `consumedQuantity`
+remains `null`; neither total is inferred from accounts.

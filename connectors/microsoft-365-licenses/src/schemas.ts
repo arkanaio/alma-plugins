@@ -21,6 +21,7 @@ export const skuSchema = z.object({
   skuId: guid,
   skuPartNumber: z.string().trim().min(1).max(200),
   appliesTo: z.enum(["User", "Company"]),
+  consumedUnits: count.nullish(),
   prepaidUnits: z.object({ enabled: count.nullish() }).nullish(),
 });
 export const skuPageSchema = z.object({

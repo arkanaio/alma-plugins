@@ -70,9 +70,26 @@ test("license-only catalogue preserves active units, unknowns and zero without i
   assert.equal(connector.manifest.activity, null);
   assert.equal(page.cursor, null);
   assert.deepEqual(
-    page.plans.map((p) => p.seatCount),
+    page.plans.map((p) => p.purchasedQuantity?.value ?? null),
     [25, null, 0],
   );
+  assert.deepEqual(
+    page.plans.map((p) => p.consumedQuantity?.value ?? null),
+    [2, 0, null],
+  );
+  assert.deepEqual(page.plans[0]?.purchasedQuantity, {
+    value: 25,
+    unit: "person",
+    source: "prepaidUnits.enabled",
+    observedOn: "2026-09-23",
+  });
+  assert.deepEqual(page.plans[0]?.consumedQuantity, {
+    value: 2,
+    unit: "person",
+    source: "consumedUnits",
+    observedOn: "2026-09-23",
+  });
+  assert.ok(calls.some((call) => call.url.includes("consumedUnits")));
   assert.equal(page.plans[0]?.externalId, firstSku);
   assert.ok(
     page.plans.every(
@@ -218,6 +235,8 @@ test("schema drift and incomplete SKU pagination fail closed", async () => {
   for (const body of [
     {},
     { value: [{ ...skus.value[0], prepaidUnits: { enabled: -1 } }] },
+    { value: [{ ...skus.value[0], consumedUnits: -1 }] },
+    { value: [{ ...skus.value[0], consumedUnits: 1.5 }] },
     {
       ...skus,
       "@odata.nextLink":
@@ -319,4 +338,22 @@ test("does not silently complete after the current SKU disappears", async () => 
     ),
     errorIs("contract", "catalog_changed"),
   );
+});
+
+test("provider consumption is independent from capacity and returned accounts", async () => {
+  for (const consumed of [null, 0, 91]) {
+    const { context } = host((url) =>
+      url.pathname === "/v1.0/subscribedSkus"
+        ? Response.json({
+            value: [
+              { ...skus.value[0], prepaidUnits: null, consumedUnits: consumed },
+            ],
+          })
+        : undefined,
+    );
+    const page = await read(context);
+    assert.equal(page.plans[0]?.purchasedQuantity, null);
+    assert.equal(page.plans[0]?.consumedQuantity?.value ?? null, consumed);
+    assert.equal(page.seats.length, 2);
+  }
 });

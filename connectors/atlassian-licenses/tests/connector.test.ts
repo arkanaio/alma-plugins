@@ -182,14 +182,20 @@ test("names each product site and keeps the seat limit only when Atlassian gives
     billingCycle: null,
     pricePerSeat: null,
     currency: null,
-    seatCount: 50,
+    purchasedQuantity: {
+      value: 50,
+      unit: "person",
+      source: "attributes.capacity",
+      observedOn: "2026-09-20",
+    },
+    consumedQuantity: null,
   });
   assert.equal(
     byId.get(confluence)?.name,
     "Confluence Standard · example.atlassian.net",
   );
   // No capacity is unknown, never the number of accounts detected.
-  assert.equal(byId.get(confluence)?.seatCount, null);
+  assert.equal(byId.get(confluence)?.purchasedQuantity, null);
   assert.equal(byId.has(sandbox), false);
 });
 

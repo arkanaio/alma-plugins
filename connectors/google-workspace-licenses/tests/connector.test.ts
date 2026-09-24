@@ -48,7 +48,7 @@ test("reads each account's edition without inventing billing or activity", async
     assert.equal(plan.pricePerSeat, null);
     assert.equal(plan.currency, null);
     assert.equal(plan.billingCycle, null);
-    assert.equal(plan.seatCount, null);
+    assert.equal(plan.purchasedQuantity?.value ?? null, null);
   }
   assert.ok(page.seats.every((seat) => seat.lastActivityAt === null));
   assert.equal(definition.manifest.activity, null);
@@ -179,12 +179,29 @@ const report = (body: unknown, status = 200, cursor: string | null = null) =>
 test("reads purchased totals, deduplicates aliases and preserves explicit zero", async () => {
   const { page, requests } = await report(purchased);
   assert.deepEqual(
-    page.plans.map((plan) => [plan.externalId, plan.seatCount]),
+    page.plans.map((plan) => [
+      plan.externalId,
+      plan.purchasedQuantity?.value ?? null,
+    ]),
     [
       ["Google-Apps/Google-Apps-For-Business", 10],
       ["Google-Apps/1010020020", 30],
       ["Google-Vault/Google-Vault", 0],
     ],
+  );
+  assert.ok(page.plans.every((plan) => plan.consumedQuantity === null));
+  assert.ok(
+    page.plans.every(
+      (plan) => plan.purchasedQuantity?.observedOn === "2026-09-18",
+    ),
+  );
+  assert.ok(
+    page.plans.every((plan) => plan.purchasedQuantity?.unit === "person"),
+  );
+  assert.ok(
+    page.plans.every((plan) =>
+      plan.purchasedQuantity?.source.startsWith("accounts:"),
+    ),
   );
   assert.deepEqual(page.seats, []);
   assert.ok(
