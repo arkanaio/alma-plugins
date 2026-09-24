@@ -69,7 +69,16 @@ export const exampleConnector: ConnectorDefinition = defineConnector({
           externalId: subscription.id,
           name: subscription.product,
           pricePerSeat: subscription.currency ? subscription.unit_price : null,
-          seatCount: subscription.seats,
+          purchasedQuantity:
+            subscription.seats === null
+              ? null
+              : {
+                  value: subscription.seats,
+                  unit: "person" as const,
+                  source: "subscriptions.seats",
+                  observedOn: context.now().toISOString().slice(0, 10),
+                },
+          consumedQuantity: null,
         })),
         seats: body.members.map((member) => ({
           accountEmail: member.email,

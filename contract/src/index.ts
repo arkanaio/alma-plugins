@@ -61,6 +61,7 @@ export {
   connectorIdSchema,
   connectorLicensePageSchema,
   connectorLicensePlanSchema,
+  connectorLicenseQuantitySchema,
   connectorLicenseSeatSchema,
   connectorManifestSchema,
   connectorPageSchemas,
