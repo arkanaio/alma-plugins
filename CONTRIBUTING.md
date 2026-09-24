@@ -233,6 +233,13 @@ See [docs/PUBLISHING.md](docs/PUBLISHING.md) for what happens after.
 Breaking changes to `@arkanaio/connector-contract` are announced here before they
 are applied, with the date and what has to change in an existing connector.
 
+- **0.2.0 (2026-09-24)** — license plans replace `seatCount` with independent
+  `purchasedQuantity` and `consumedQuantity` readings. Each is `null` when
+  unknown, or an object with `value`, `unit`, `source` (the provider field),
+  and `observedOn` (the provider report date, or the UTC read date for live
+  values). Units are `person`, `device`, `entitlement`, `concurrent`, or
+  `consumption`. Preserve zero and never substitute assignment counts.
+  See [ALMA #574](https://github.com/arkanaio/alma/issues/574).
 - **0.1.1** — first version on public npm, and the first carrying its licence.
   No change to the contract itself: install it with
   `pnpm add @arkanaio/connector-contract`, with no token and no registry

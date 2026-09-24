@@ -287,6 +287,21 @@ const decimalAmountSchema = z
   .regex(/^\d{1,10}(?:\.\d{1,2})?$/, "An amount uses up to two decimals.")
   .nullable();
 
+export const connectorLicenseQuantitySchema = z
+  .object({
+    value: z.int().min(0).max(1_000_000),
+    unit: z.enum([
+      "person",
+      "device",
+      "entitlement",
+      "concurrent",
+      "consumption",
+    ]),
+    source: z.string().trim().min(1).max(200),
+    observedOn: z.iso.date(),
+  })
+  .strict();
+
 export const connectorLicensePlanSchema = z
   .object({
     billingCycle: z.enum(connectorBillingCycles).nullable(),
@@ -299,7 +314,8 @@ export const connectorLicensePlanSchema = z
     externalId: externalIdSchema,
     name: z.string().trim().min(1).max(200),
     pricePerSeat: decimalAmountSchema,
-    seatCount: z.int().min(0).max(1_000_000).nullable(),
+    purchasedQuantity: connectorLicenseQuantitySchema.nullable(),
+    consumedQuantity: connectorLicenseQuantitySchema.nullable(),
   })
   .strict();
 
