@@ -2,8 +2,7 @@
 
 Reads the product sites of an Atlassian Cloud organization (Jira, Confluence,
 Jira Service Management and the rest of the workspaces Atlassian Administration
-lists), the seat limit Atlassian reports for each one, and the accounts that
-hold a billable role on it. It uses the
+lists) and the accounts that hold a billable role on each one. It uses the
 [Organizations REST API](https://developer.atlassian.com/cloud/admin/organization/rest/intro/)
 at `api.atlassian.com` and nothing else.
 
@@ -50,11 +49,12 @@ next site in the same order.
 
 ## Data and limits
 
-- **Purchased seats.** `purchasedQuantity` contains the site's `capacity`, the seat limit
-  Atlassian reports when it has license data for that site. When it does not,
-  `purchasedQuantity` is `null`: unknown, never replaced by the number of accounts
-  detected. Atlassian bills Jira and Confluence by user tier, so the limit can
-  be higher than what the organization uses.
+- **Purchased seats.** `purchasedQuantity` is always `null`: unknown, never
+  replaced by the number of accounts detected. The Organizations API does not
+  expose what an organization bought. A workspace's `capacity` and `usage` are
+  the plan's ceiling, not a purchase: a real Bitbucket Standard workspace
+  reported 100,000 for both, the `softCapacityLimit` of its entitlement. The
+  host asks for the purchased quantity by hand.
 - **Billable roles only.** Guests, Jira Service Management customers,
   contributors, basic users, stakeholders and user-access admins hold no paid
   seat and are not read. Suspended and deactivated accounts are not read either.
@@ -86,6 +86,5 @@ this manifest's `allowedHosts`, and never contact Atlassian. Build with
 `pnpm --filter @arkanaio/connector-atlassian-licenses build` and run
 `pnpm verify` before review.
 
-Quantity provenance is `attributes.capacity`, its unit is `person`, and its
-observation date is the UTC read date. `consumedQuantity` is always `null`;
-the account list is not a provider aggregate.
+`purchasedQuantity` and `consumedQuantity` are always `null`; the account list
+is not a provider aggregate.
