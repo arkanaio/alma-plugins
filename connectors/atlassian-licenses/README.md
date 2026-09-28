@@ -2,7 +2,7 @@
 
 Reads the product sites of an Atlassian Cloud organization (Jira, Confluence,
 Jira Service Management and the rest of the workspaces Atlassian Administration
-lists) and the accounts that hold a billable role on each one. It uses the
+lists, except Bitbucket) and the accounts that hold a billable role on each one. It uses the
 [Organizations REST API](https://developer.atlassian.com/cloud/admin/organization/rest/intro/)
 at `api.atlassian.com` and nothing else.
 
@@ -88,3 +88,6 @@ this manifest's `allowedHosts`, and never contact Atlassian. Build with
 
 `purchasedQuantity` and `consumedQuantity` are always `null`; the account list
 is not a provider aggregate.
+
+Bitbucket workspaces are excluded: use the separate Bitbucket license connector
+with both its personal API token and the owning organization API key.

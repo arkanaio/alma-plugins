@@ -89,6 +89,8 @@ async function listWorkspaces(request: Request): Promise<Workspace[]> {
     for (const workspace of body.data.data) {
       // A sandbox copies a production site and holds no seats of its own.
       if (workspace.attributes.sandbox?.type === "CHILD") continue;
+      // Bitbucket membership is read by its dedicated two-credential connector.
+      if (workspace.attributes.typeKey.toLowerCase() === "bitbucket") continue;
       workspaces.set(workspace.id, workspace);
     }
     const next = body.data.links?.next;

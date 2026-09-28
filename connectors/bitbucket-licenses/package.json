@@ -1,13 +1,13 @@
 {
-  "name": "@arkanaio/connector-atlassian-licenses",
-  "version": "0.2.2",
-  "description": "Atlassian Cloud product seats and billable role assignments for ALMA.",
+  "name": "@arkanaio/connector-bitbucket-licenses",
+  "version": "0.1.0",
+  "description": "Bitbucket workspace license members enriched from the Atlassian directory.",
   "license": "Apache-2.0",
   "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/arkanaio/alma-plugins.git",
-    "directory": "connectors/atlassian-licenses"
+    "directory": "connectors/bitbucket-licenses"
   },
   "exports": {
     ".": "./dist/index.js"
