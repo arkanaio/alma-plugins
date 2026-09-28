@@ -134,7 +134,7 @@ function planOf(workspace: Workspace): string | null {
   return null;
 }
 
-function planFor(workspace: Workspace, observedOn: string) {
+function planFor(workspace: Workspace) {
   const product = workspace.attributes.type || workspace.attributes.typeKey;
   const edition = [product, planOf(workspace)].filter(Boolean).join(" ");
   const site = siteOf(workspace);
@@ -144,17 +144,10 @@ function planFor(workspace: Workspace, observedOn: string) {
     billingCycle: null,
     pricePerSeat: null,
     currency: null,
-    // Atlassian reports the seat limit of a site only when it has license data
-    // for it. Without it, the purchased total is unknown, never the accounts.
-    purchasedQuantity:
-      workspace.attributes.capacity == null
-        ? null
-        : {
-            value: workspace.attributes.capacity,
-            unit: "person" as const,
-            source: "attributes.capacity",
-            observedOn,
-          },
+    // The Organizations API has no purchased total. Its capacity is the plan's
+    // ceiling (100,000 for Bitbucket Standard, from softCapacityLimit), not
+    // what the organization bought, so the total stays unknown for the host.
+    purchasedQuantity: null,
     consumedQuantity: null,
   };
 }
@@ -261,7 +254,7 @@ export const atlassianLicensesConnector: ConnectorDefinition = defineConnector({
       return {
         cursor: next === null ? null : encodeCursor(next),
         plans: (state ? read : workspaces).map((workspace) =>
-          planFor(workspace, context.now().toISOString().slice(0, 10)),
+          planFor(workspace),
         ),
         seats,
       };

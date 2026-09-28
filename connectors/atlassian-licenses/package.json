@@ -1,6 +1,6 @@
 {
   "name": "@arkanaio/connector-atlassian-licenses",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Atlassian Cloud product seats and billable role assignments for ALMA.",
   "license": "Apache-2.0",
   "type": "module",
