@@ -1,0 +1,76 @@
+{
+  "workspaces": {
+    "": {
+      "data": [],
+      "links": {
+        "next": "workspaces-2"
+      }
+    },
+    "workspaces-2": {
+      "data": [
+        {
+          "id": "ari:cloud:bitbucket::workspace/00000000-0000-4000-8000-000000000001",
+          "attributes": {
+            "typeKey": "bitbucket",
+            "hostUrl": "https://bitbucket.org/example",
+            "capacity": 100000,
+            "usage": 100000
+          }
+        }
+      ]
+    }
+  },
+  "members": {
+    "1": {
+      "size": 3,
+      "values": [
+        {
+          "user": {
+            "account_id": "account-1",
+            "display_name": "Alex Example"
+          }
+        },
+        {
+          "user": {
+            "account_id": "account-2"
+          }
+        }
+      ],
+      "next": "https://api.bitbucket.org/2.0/workspaces/example/members?pagelen=100&page=2"
+    },
+    "2": {
+      "size": 3,
+      "values": [
+        {
+          "user": {
+            "account_id": "account-3",
+            "display_name": "Sam Example"
+          }
+        }
+      ]
+    }
+  },
+  "users": {
+    "": {
+      "data": [
+        {
+          "accountId": "account-1",
+          "email": "alex@example.invalid",
+          "status": "active"
+        }
+      ],
+      "links": {
+        "next": "users-2"
+      }
+    },
+    "users-2": {
+      "data": [
+        {
+          "accountId": "account-3",
+          "email": "sam@example.invalid",
+          "status": "invited"
+        }
+      ]
+    }
+  }
+}

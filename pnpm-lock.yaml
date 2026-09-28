@@ -27,6 +27,15 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
 
+  connectors/bitbucket-licenses:
+    dependencies:
+      '@arkanaio/connector-contract':
+        specifier: workspace:0.2.0
+        version: link:../../contract
+      zod:
+        specifier: 4.4.3
+        version: 4.4.3
+
   connectors/example:
     dependencies:
       '@arkanaio/connector-contract':

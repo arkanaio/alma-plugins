@@ -381,3 +381,28 @@ test("validates its configuration and secret before any request", async () => {
   }
   assert.deepEqual(requests, []);
 });
+
+test("Bitbucket workspaces are reserved for the dedicated connector", async () => {
+  const { page, requests } = await read(null, (url, body) => {
+    if (!url.endsWith("/workspaces")) return sampleProvider(url, body);
+    return Response.json({
+      data: [
+        {
+          id: "ari:cloud:bitbucket::workspace/sample-workspace",
+          attributes: {
+            typeKey: "bitbucket",
+            type: "Bitbucket",
+            hostUrl: "https://bitbucket.org/example",
+            capacity: 100000,
+          },
+          relationships: {
+            entitlement: [{ attributes: { plan: "Standard" } }],
+          },
+        },
+      ],
+    });
+  });
+  assert.deepEqual(page.plans, []);
+  assert.deepEqual(page.seats, []);
+  assert.equal(requests.length, 1);
+});
