@@ -187,6 +187,8 @@ export const bitbucketLicensesConnector: ConnectorDefinition = defineConnector({
           throw new ConnectorError("contract", "conflicting_account");
         emails.set(user.accountId, value);
       }
+      const observedOn =
+        state?.observedOn ?? context.now().toISOString().slice(0, 10);
       const count = (state?.count ?? 0) + members.values.length;
       let next: string | null = null;
       if (members.next) {
@@ -214,6 +216,7 @@ export const bitbucketLicensesConnector: ConnectorDefinition = defineConnector({
           count,
           total: members.size,
           workspaceId: site.id,
+          observedOn,
         });
       } else if (count !== members.size)
         throw new ConnectorError("contract", "incomplete_membership");
@@ -227,7 +230,7 @@ export const bitbucketLicensesConnector: ConnectorDefinition = defineConnector({
               value: members.size,
               unit: "person",
               source: "GET /2.0/workspaces/{workspace}/members.size",
-              observedOn: context.now().toISOString().slice(0, 10),
+              observedOn,
             },
             consumedQuantity: null,
             billingCycle: null,

@@ -231,3 +231,16 @@ test("organization loops fail and cannot redirect credentials between hosts", as
     await assert.rejects(read(host({ fixture }).context), /contract:/);
   }
 });
+
+test("a read crossing UTC midnight keeps consistent quantity provenance", async () => {
+  const { context } = host();
+  const first = await read(context);
+  const last = await read(
+    { ...context, now: () => new Date("2026-09-29T00:00:00Z") },
+    first.cursor,
+  );
+  assert.deepEqual(
+    last.plans[0]?.purchasedQuantity,
+    first.plans[0]?.purchasedQuantity,
+  );
+});

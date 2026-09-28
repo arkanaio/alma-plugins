@@ -52,5 +52,6 @@ export const cursorSchema = z
     count: z.int().min(0).max(1_000_000),
     total: z.int().min(0).max(1_000_000),
     workspaceId: identifier,
+    observedOn: z.iso.date(),
   })
   .strict();
