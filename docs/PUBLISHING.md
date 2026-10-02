@@ -33,6 +33,67 @@ ALMA's side of this is
 6. **Activation.** The customer organisation configures its credentials and
    enables it.
 
+## Trusted publishing
+
+The publish workflow authenticates to public npm using GitHub Actions OIDC,
+without `NPM_TOKEN` or `NODE_AUTH_TOKEN`. It runs on `ubuntu-latest`, because
+npm does not support trusted publishing from self-hosted runners, and always
+requests provenance. The exact-version security-review gate still runs before
+publishing; an attestation does not replace a review.
+
+A maintainer must configure a trusted publisher **for each non-private package**
+before its next automated release. In the package's npm settings, select GitHub
+Actions and use:
+
+| Field | Value |
+|---|---|
+| Organization or user | `arkanaio` |
+| Repository | `alma-plugins` |
+| Workflow filename | `publish.yml` |
+| Environment | `publish` |
+| Allowed action | Direct publishing (`npm publish`) |
+
+The active packages are `@arkanaio/connector-contract`,
+`@arkanaio/connector-atlassian-licenses`,
+`@arkanaio/connector-bitbucket-licenses`,
+`@arkanaio/connector-github-licenses`,
+`@arkanaio/connector-google-workspace-licenses`, and
+`@arkanaio/connector-microsoft-365-licenses`. Add every new public workspace
+package to this configuration; private examples never publish. Retired packages
+are not released by this repository and do not need a new trust relationship.
+
+npm also supports `npm trust` from npm 11.15.0 onward, using an authenticated
+maintainer session with 2FA. A bypass-2FA automation token cannot configure it.
+See [npm's trusted publishing guide](https://docs.npmjs.com/trusted-publishers/)
+and [the CLI requirements](https://docs.npmjs.com/cli/v11/commands/npm-trust/).
+
+### First publication of a new package
+
+A trusted publisher can only be configured after the package exists on npm.
+A maintainer first publishes the real, verified initial version from an
+interactive npm session with 2FA, after checking its security review when
+required. Use `pnpm --filter <package-name> publish --access public` from the
+accepted release commit. Do not publish an empty placeholder or store an
+automation token in CI. Configure the publisher immediately afterward; the
+next version can then be published by the workflow. A local first publication
+does not have GitHub Actions provenance; verify provenance on the subsequent
+OIDC release.
+
+### Migration verification and token removal
+
+1. Configure all active packages before merging the token-free workflow.
+2. Release a new version through `publish.yml` with no static npm token supplied.
+   Keep the run URL, commit and package version as the evidence; a run that
+   finds no pending versions does not prove publishing works.
+3. Check the authentication output for OIDC and the published version's registry
+   metadata for its trusted publisher and provenance attestation. Verify the
+   attestation points to this repository, workflow and release commit.
+4. Only after that succeeds, remove the repository's `NPM_TOKEN` secret and its
+   entry from the local production secret file. Revoke the old automation token
+   on npm as well: deleting stored copies does not revoke the credential.
+5. Confirm the GitHub secret and local variable are absent without printing
+   their values, and retain the release evidence with the migration handoff.
+
 ## Why a package, and what checks what
 
 The split is the one that already makes sense in a project with a package

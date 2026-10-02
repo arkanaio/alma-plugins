@@ -226,7 +226,8 @@ dependencies, narrower hosts, a field removed from an error. That is not
 distrust of the contributor; it is that the cost of getting this wrong is paid
 by a customer who never saw the pull request.
 
-See [docs/PUBLISHING.md](docs/PUBLISHING.md) for what happens after.
+See [docs/PUBLISHING.md](docs/PUBLISHING.md) for what happens after, including
+the maintainer setup required before a new package can publish through OIDC.
 
 ## Contract changes
 
