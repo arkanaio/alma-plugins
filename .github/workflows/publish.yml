@@ -29,26 +29,16 @@ permissions:
 jobs:
   publish:
     name: publish
-    runs-on: ${{ fromJSON(vars.CI_RUNS_ON || '["self-hosted","alma"]') }}
+    # npm trusted publishing requires a GitHub-hosted runner.
+    runs-on: ubuntu-latest
     environment: publish
     steps:
       - uses: actions/checkout@v4
-      # The organisation's runners share a HOME: the action reinstalls pnpm into
-      # dest on start, and two self-installs at once over the same directory
-      # corrupt it. Each instance uses its own; GitHub-hosted runners keep the
-      # default destination. Same reasoning as arkanaio/alma.
       - uses: pnpm/action-setup@v4
-        with:
-          dest: ${{ runner.environment == 'self-hosted' && format('~/setup-pnpm/{0}', runner.name) || '~/setup-pnpm' }}
       - uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: pnpm
-          # Public npm, not GitHub Packages. The contract is the interface
-          # anyone writing a connector compiles against, and GitHub Packages
-          # asks for a personal token even to read a public package: that is a
-          # barrier in front of the one package that must not have one.
-          registry-url: https://registry.npmjs.org
       - run: pnpm install --frozen-lockfile
       # Nothing is published that has not passed the same checks as a PR.
       - run: pnpm verify
@@ -74,9 +64,9 @@ jobs:
           while read -r package; do
             node .github/scripts/check-reviews.mjs --package "$package"
           done <<< "$PACKAGES"
-      # Provenance only on GitHub-hosted runners: npm rejects an attestation
-      # built anywhere else, because an attestation is worth exactly as much as
-      # the verifiability of the machine that made it.
+      # Authentication uses the per-package npm trusted publisher configured
+      # for this repository, publish.yml and the publish environment. No static
+      # npm token is passed to the job. Provenance binds the tarball to this run.
       #
       # pnpm publishes the filtered packages in dependency order, so a contract
       # raised in the same merge as the connector that needs it goes first.
@@ -84,11 +74,9 @@ jobs:
         if: steps.pending.outputs.packages != ''
         env:
           PACKAGES: ${{ steps.pending.outputs.packages }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          PROVENANCE: ${{ runner.environment == 'github-hosted' && '--provenance' || '' }}
         run: |
           filters=()
           while read -r package; do
             filters+=(--filter "$package")
           done <<< "$PACKAGES"
-          pnpm -r "${filters[@]}" publish --access public --no-git-checks $PROVENANCE
+          pnpm -r "${filters[@]}" publish --access public --no-git-checks --provenance
