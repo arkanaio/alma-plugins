@@ -1,0 +1,17 @@
+{
+  "kind": "licensing#licenseAssignmentList",
+  "items": [
+    {
+      "productId": "101047",
+      "skuId": "1010470006",
+      "skuName": "Gemini Security",
+      "userId": "orphan@example.invalid"
+    },
+    {
+      "productId": "101047",
+      "skuId": "future-gemini-sku",
+      "skuName": "Future Gemini edition",
+      "userId": "alex@example.invalid"
+    }
+  ]
+}

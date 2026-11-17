@@ -1,7 +1,7 @@
 {
   "name": "@arkanaio/connector-google-workspace-licenses",
-  "version": "0.2.0",
-  "description": "Google Workspace license editions and assignments for ALMA.",
+  "version": "0.3.0",
+  "description": "Google Workspace and Gemini license editions and assignments for ALMA.",
   "license": "Apache-2.0",
   "type": "module",
   "repository": {

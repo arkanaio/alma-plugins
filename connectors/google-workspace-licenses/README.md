@@ -1,9 +1,10 @@
 # Google Workspace licenses
 
-Reads the Google Workspace edition assigned to each account using Enterprise
-License Manager API, product `Google-Apps`, and purchased-license totals from
-Customer Usage Reports where Google exposes them. This is a separate connector from
-the directory. Enabling the directory never enables license collection.
+Reads the Google Workspace and Gemini editions assigned to each account using
+Enterprise License Manager API products `Google-Apps`, `101068` and `101047`,
+and purchased-license totals from Customer Usage Reports where Google exposes
+them. This is a separate connector from the directory. Enabling the directory
+never enables license collection.
 
 ## Authorization
 
@@ -34,8 +35,9 @@ that the customer ID belongs to the authenticated organization's directory.
 
 - The provider's SKU ID and SKU name identify the edition. Unknown future SKUs
   remain readable; no hard-coded SKU catalogue can silently omit them.
-- All pages must finish before the host reconciles absences. Page size is 100;
-  the opaque Google page token is returned as the continuation cursor.
+- All pages of all supported products must finish before the host reconciles
+  absences. Page size is 100; the continuation cursor records the current
+  product and Google's opaque page token.
 - Prices, currencies and billing cycles remain null. Assignment mode returns
   null seat counts: assigned accounts are not purchased seat totals.
 - Purchased mode returns documented totals for G Suite Basic (deduplicating
@@ -52,8 +54,13 @@ that the customer ID belongs to the authenticated organization's directory.
   never user-activity metrics. It also covers totals without assigned accounts;
   Vault assignments remain outside assignment-mode coverage.
 - Activity is not declared or collected. No last-sign-in is substituted for use.
-- Assignment mode only reads `Google-Apps`: separate-product add-ons, archived-user licenses,
-  device licenses and domain-wide SKUs are outside this version's coverage.
+- Assignment mode reads `Google-Apps`, Gemini Business (`101068`) and Gemini
+  (`101047`). Each SKU remains a separate plan. Other separate-product add-ons,
+  archived-user licenses, device licenses and domain-wide SKUs are outside this
+  version's coverage.
+- Google does not expose purchased Gemini quantities, prices, currency or
+  billing cycle through these reads. Assignment counts never substitute for
+  purchase or contract data.
 - `userId` is the account's current primary email, not a stable Directory ID.
   A rename appears as an absent old account and a newly detected one. The host
   must not silently release manually assigned seats based on this change.

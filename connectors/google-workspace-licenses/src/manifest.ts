@@ -43,12 +43,12 @@ export const manifest = {
     },
   ],
   description:
-    "Reads assigned Workspace editions and documented purchased-license totals from customer Reports. No prices or user activity.",
+    "Reads assigned Workspace and Gemini editions and documented purchased-license totals from customer Reports. No prices or user activity.",
   documentationUrl:
     "https://github.com/arkanaio/alma-plugins/tree/main/connectors/google-workspace-licenses",
   id: "google_workspace_licenses",
   name: "Google Workspace",
   pricing: { exposesBillingCycle: false, exposesPricePerSeat: false },
   supportLevel: "official",
-  version: "0.2.0",
+  version: "0.3.0",
 } as const;

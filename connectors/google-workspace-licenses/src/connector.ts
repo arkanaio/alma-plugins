@@ -7,6 +7,48 @@ import { manifest } from "./manifest.ts";
 import { readPurchasedLicenses } from "./reports.ts";
 import { assignmentListSchema, configurationSchema } from "./schemas.ts";
 
+const assignmentProductIds = ["Google-Apps", "101068", "101047"] as const;
+const cursorSeparator = ":";
+const cursorVersion = "v1";
+
+function assignmentPosition(cursor: string | null): {
+  pageToken: string | null;
+  productIndex: number;
+} {
+  if (cursor === null) return { pageToken: null, productIndex: 0 };
+  if (!cursor.startsWith(`${cursorVersion}${cursorSeparator}`))
+    return { pageToken: cursor, productIndex: 0 };
+  const separatorIndex = cursor.indexOf(cursorSeparator);
+  const productSeparatorIndex = cursor.indexOf(
+    cursorSeparator,
+    separatorIndex + 1,
+  );
+  if (productSeparatorIndex === -1)
+    throw new ConnectorError("contract", "invalid_cursor");
+  const productId = cursor.slice(separatorIndex + 1, productSeparatorIndex);
+  const productIndex = assignmentProductIds.indexOf(
+    productId as (typeof assignmentProductIds)[number],
+  );
+  if (productIndex === -1)
+    throw new ConnectorError("contract", "invalid_cursor");
+  return {
+    pageToken: cursor.slice(productSeparatorIndex + 1) || null,
+    productIndex,
+  };
+}
+
+function nextAssignmentCursor(
+  productIndex: number,
+  nextPageToken: string | undefined,
+): string | null {
+  if (nextPageToken)
+    return `${cursorVersion}${cursorSeparator}${assignmentProductIds[productIndex]}${cursorSeparator}${nextPageToken}`;
+  const nextProductId = assignmentProductIds[productIndex + 1];
+  return nextProductId
+    ? `${cursorVersion}${cursorSeparator}${nextProductId}${cursorSeparator}`
+    : null;
+}
+
 export const googleWorkspaceLicensesConnector: ConnectorDefinition =
   defineConnector({
     manifest,
@@ -32,12 +74,16 @@ export const googleWorkspaceLicensesConnector: ConnectorDefinition =
             cursor,
           );
         }
+        const position = assignmentPosition(cursor);
+        const productId = assignmentProductIds[position.productIndex];
+        if (!productId) throw new ConnectorError("contract", "invalid_cursor");
         const url = new URL(
-          "https://licensing.googleapis.com/apps/licensing/v1/product/Google-Apps/users",
+          `https://licensing.googleapis.com/apps/licensing/v1/product/${productId}/users`,
         );
         url.searchParams.set("customerId", configuration.data.customer_id);
         url.searchParams.set("maxResults", "100");
-        if (cursor !== null) url.searchParams.set("pageToken", cursor);
+        if (position.pageToken !== null)
+          url.searchParams.set("pageToken", position.pageToken);
         const response = await context.fetch(url.toString(), {
           headers: {
             accept: "application/json",
@@ -54,7 +100,7 @@ export const googleWorkspaceLicensesConnector: ConnectorDefinition =
           throw new ConnectorError("service", "provider_unavailable");
         if (!response.ok)
           throw new ConnectorError("contract", "unexpected_status");
-        const body = assignmentListSchema.safeParse(
+        const body = assignmentListSchema(productId).safeParse(
           await response.json().catch(() => null),
         );
         if (!body.success)
@@ -67,9 +113,12 @@ export const googleWorkspaceLicensesConnector: ConnectorDefinition =
           plans.set(assignment.skuId, assignment.skuName);
         }
         return {
-          cursor: body.data.nextPageToken ?? null,
+          cursor: nextAssignmentCursor(
+            position.productIndex,
+            body.data.nextPageToken,
+          ),
           plans: [...plans].map(([skuId, name]) => ({
-            externalId: `Google-Apps/${skuId}`,
+            externalId: `${productId}/${skuId}`,
             name,
             billingCycle: null,
             pricePerSeat: null,
@@ -85,7 +134,7 @@ export const googleWorkspaceLicensesConnector: ConnectorDefinition =
             accountEmail: assignment.userId.toLowerCase(),
             accountName: null,
             lastActivityAt: null,
-            planExternalId: `Google-Apps/${assignment.skuId}`,
+            planExternalId: `${productId}/${assignment.skuId}`,
           })),
         };
       },
