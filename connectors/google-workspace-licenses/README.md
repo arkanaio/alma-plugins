@@ -78,8 +78,9 @@ References: [assignments](https://developers.google.com/workspace/admin/licensin
 Sample responses are synthetic and contain no customer data. Tests exercise the
 real host boundary with an in-memory transport and never contact Google.
 Build with `pnpm --filter @arkanaio/connector-google-workspace-licenses build`.
-Run `pnpm verify` before review. Version 0.1.1 requires its own human security
-review and publication before it can be incorporated into ALMA.
+Run `pnpm verify` before review. Version 0.3.0 must be merged and published
+before it can be incorporated into ALMA. The repository's documented pre-1.0
+security-review waiver applies to this release.
 
 Under contract 0.2.0, assignment pages have both quantities set to `null`.
 Report pages expose `purchasedQuantity` with unit `person`, the exact metric
