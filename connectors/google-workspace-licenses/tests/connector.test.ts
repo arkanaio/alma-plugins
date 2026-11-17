@@ -6,6 +6,9 @@ import {
   createConnectorFetch,
 } from "@arkanaio/connector-contract";
 import assignments from "../sample-data/assignments.json" with { type: "json" };
+import geminiAssignments from "../sample-data/gemini-assignments.json" with {
+  type: "json",
+};
 import purchased from "../sample-data/purchased.json" with { type: "json" };
 import { googleWorkspaceLicensesConnector } from "../src/index.ts";
 
@@ -39,7 +42,7 @@ async function read(
 
 test("reads each account's edition without inventing billing or activity", async () => {
   const { page, requests } = await read(assignments);
-  assert.equal(page.cursor, "sample-page-2");
+  assert.equal(page.cursor, "v1:Google-Apps:sample-page-2");
   assert.equal(page.plans.length, 2);
   assert.equal(page.seats[0]?.planExternalId, "Google-Apps/1010020028");
   assert.equal(page.seats[1]?.planExternalId, "Google-Apps/1010020025");
@@ -67,19 +70,47 @@ test("reads each account's edition without inventing billing or activity", async
   assert.ok(!request.url.includes("sample-token"));
 });
 
-test("passes the opaque cursor and accepts a genuinely empty final page", async () => {
-  const { page, requests } = await read(
-    { kind: assignments.kind },
-    200,
-    "next/page?=",
-  );
-  assert.deepEqual(page, { cursor: null, plans: [], seats: [] });
-  const request = requests[0];
+test("walks every supported product and keeps Google's page token opaque", async () => {
+  const workspace = await read({ kind: assignments.kind }, 200, "next/page?=");
+  assert.deepEqual(workspace.page, {
+    cursor: "v1:101068:",
+    plans: [],
+    seats: [],
+  });
+  const request = workspace.requests[0];
   assert.ok(request);
   assert.equal(
     new URL(request.url).searchParams.get("pageToken"),
     "next/page?=",
   );
+  assert.equal(
+    new URL(request.url).pathname,
+    "/apps/licensing/v1/product/Google-Apps/users",
+  );
+
+  const business = await read(
+    { kind: assignments.kind },
+    200,
+    workspace.page.cursor,
+  );
+  assert.equal(business.page.cursor, "v1:101047:");
+  assert.equal(
+    new URL(business.requests[0]?.url ?? "").pathname,
+    "/apps/licensing/v1/product/101068/users",
+  );
+  assert.equal(
+    new URL(business.requests[0]?.url ?? "").searchParams.get("pageToken"),
+    null,
+  );
+
+  const gemini = await read(geminiAssignments, 200, business.page.cursor);
+  assert.equal(gemini.page.cursor, null);
+  assert.equal(
+    new URL(gemini.requests[0]?.url ?? "").pathname,
+    "/apps/licensing/v1/product/101047/users",
+  );
+  assert.equal(gemini.page.plans[0]?.externalId, "101047/1010470006");
+  assert.equal(gemini.page.seats[0]?.accountEmail, "orphan@example.invalid");
 });
 
 test("absent optional fields arrive as null, as the contract delivers them", async () => {
@@ -97,26 +128,20 @@ test("absent optional fields arrive as null, as the contract delivers them", asy
   );
 });
 
-test("keeps new SKUs readable and collapses repeated plans", async () => {
-  const { page } = await read({
-    kind: assignments.kind,
-    items: [
-      {
-        productId: "Google-Apps",
-        skuId: "future-sku",
-        skuName: "Future edition",
-        userId: "ALEX@example.invalid",
-      },
-      {
-        productId: "Google-Apps",
-        skuId: "future-sku",
-        skuName: "Future edition",
-        userId: "sam@example.invalid",
-      },
-    ],
+test("keeps unknown Gemini SKUs readable", async () => {
+  const { page } = await read(geminiAssignments, 200, "v1:101047:");
+  assert.equal(page.plans.length, 2);
+  assert.equal(page.plans[1]?.externalId, "101047/future-gemini-sku");
+  assert.equal(page.seats[1]?.accountExternalId, "alex@example.invalid");
+});
+
+test("rejects an invalid product cursor and a cross-product response", async () => {
+  await assert.rejects(read(assignments, 200, "v1:unknown:"), {
+    code: "invalid_cursor",
   });
-  assert.equal(page.plans.length, 1);
-  assert.equal(page.seats[0]?.accountExternalId, "alex@example.invalid");
+  await assert.rejects(read(assignments, 200, "v1:101047:"), {
+    code: "unexpected_payload",
+  });
 });
 
 for (const [status, kind, retryable] of [

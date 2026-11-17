@@ -13,29 +13,14 @@ concurrency:
   group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
-# Jobs run on the organisation's own runners (the "alma" label), the same ones
-# arkanaio/alma uses. To fall back to GitHub-hosted runners, set the repository
-# variable CI_RUNS_ON to "ubuntu-latest", quoted, because it is read as JSON.
-#
-# That variable has to be set before this repository is made public. The
-# organisation's runner group has allows_public_repositories set to false, which
-# is exactly right: a self-hosted runner executing a pull request from a fork is
-# running unreviewed code on the organisation's machine, and receiving pull
-# requests from forks is what this repository exists for. Actions is free on
-# public repositories, so the switch costs nothing.
+# Use GitHub-hosted runners for pull requests, including contributions from forks.
 jobs:
   verify:
     name: verify
-    runs-on: ${{ fromJSON(vars.CI_RUNS_ON || '["self-hosted","alma"]') }}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # The organisation's runners share a HOME: the action reinstalls pnpm into
-      # dest on start, and two self-installs at once over the same directory
-      # corrupt it. Each instance uses its own; GitHub-hosted runners keep the
-      # default destination. Same reasoning as arkanaio/alma.
       - uses: pnpm/action-setup@v4
-        with:
-          dest: ${{ runner.environment == 'self-hosted' && format('~/setup-pnpm/{0}', runner.name) || '~/setup-pnpm' }}
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -62,7 +47,7 @@ jobs:
   dco:
     name: dco
     if: github.event_name == 'pull_request'
-    runs-on: ${{ fromJSON(vars.CI_RUNS_ON || '["self-hosted","alma"]') }}
+    runs-on: ubuntu-latest
     steps:
       # The whole range between base and head has to be readable, so the default
       # shallow clone is not enough.
